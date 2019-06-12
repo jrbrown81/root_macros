@@ -27,5 +27,26 @@ Double_t GetEnhancement(TH1F* hist)
 
 	enh=(-amp+off)/(amp+off);
 
+   Double_t amp_err;
+   Double_t off_err;
+   Double_t enh_err;
+   
+   Double_t damp;
+   
+   damp=hist->GetXaxis()->GetBinWidth(1);
+   damp=damp*TMath::Pi()/180;
+   damp=TMath::Sin(damp)/damp;
+
+   amp_err = cos2phi->GetParError(0);
+   off_err=cos2phi->GetParError(1);
+ 
+   enh_err = 2/pow((off+amp),2)*sqrt(amp*amp*off_err*off_err+off*off*amp_err*amp_err);
+
+   cout << "Amplitde: " << amp << " +/- " << amp_err << endl
+         << "Offset: " << off << "  +/- " << off_err << endl
+         << "Enhancement: " << enh << " +/- " << enh_err << endl
+         << "Damping factor: " << damp << endl;
+
+
 	return enh;
 }
