@@ -110,3 +110,14 @@ void fitPeak(TH1F* histo, double fitMin, double fitMax) {
 	c1->SaveAs(myString);
 */
 }
+
+void fitPeak(TH1I* histo, double fitMin, double fitMax) {
+
+   cout << "Received TH1I. Cloning to a TH1F for fitting." << endl;
+   
+   TString str=histo->GetName();
+   str+="_th1f";
+   TH1F* hist_th1f=(TH1F*)histo->Clone(str);
+   
+   fitPeak(hist_th1f,fitMin,fitMax);
+}
