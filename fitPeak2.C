@@ -11,12 +11,15 @@
 #include "TF1.h"
 #include "TH1.h"
 
+TFitResultPtr fitPeak(TH1F* histo, double fitMin, double fitMax, TString option = "S", TString goption = "") {
 //void fitPeak(double peakPos, double fitMin, double fitMax) {
-double fitPeak(TH1F* histo, double fitMin, double fitMax) {
+//double fitPeak(TH1F* histo, double fitMin, double fitMax) {
 //void fitPeak(double fitMin, double fitMax) {
 //void findAndFit(double fitMin, double fitMax) {
 
 //	ofstream out("output.dat");
+
+   if(!option.Contains("S")) option+="S";
 
         double entries=(double)histo->GetEntries();
 // Centroid
@@ -51,21 +54,29 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax) {
 //        myFunc->SetParameters(1,-1,integral,centroid,fwhm);
         myFunc->SetParameters(1,0,integral,centroid,fwhm);
 
+
+      if(!option.Contains("Q")) {
+         cout << endl << "//////////////////////////////////////////////////////" << endl;
+         cout << "Fitting: " << histo->GetTitle() << endl;
+         cout << "//////////////////////////////////////////////////////" << endl;
+      }
+      if(option.Contains("V")){
         cout << endl << "//////////////////////////////////////////////////////" << endl;
         cout << "//////////////// Fit Parameter Limits ////////////////" << endl;
         cout << "Parameter	Min	 	Max       Guess" << endl;
-        cout << "Offset:		0		" << entries/2 << "     1" << endl;
-//        cout << "Slope:      " << -entries/centroid << "   2          -1" << endl;
-        cout << "Slope:      " << "    0     " << "   2          -1" << endl;
+        cout << "Offset:		0		" << entries/2 << "       1" << endl;
+        cout << "Slope:          " << -entries/centroid << "        2          -1" << endl;
+//        cout << "Slope:      " << "    0     " << "   2          -1" << endl;
 //        cout << "Constant:   5      " << entries << endl;
         cout << "Constant:       " << minConst << "           " << maxConst << "       " << integral << endl;
-        cout << "Mean:		" << fitMin << "		" << fitMax << "   " << centroid << endl;
-        cout << "Sigma:		" << minWidth << "	 	" << maxWidth << "     " << fwhm << endl;
+        cout << "Mean:		" << fitMin << "		" << fitMax << "       " << centroid << endl;
+        cout << "Sigma:		" << minWidth << "	 	" << maxWidth << "        " << fwhm << endl;
         cout << "//////////////////////////////////////////////////////" << endl << endl;;
-        
-        histo->Fit(myFunc,"","",fitMin,fitMax);
-        centroid=myFunc->GetParameter(3);
-        fwhm=2.35*myFunc->GetParameter(4);
+      }
+   
+        TFitResultPtr fitPtr = histo->Fit(myFunc,option,goption,fitMin,fitMax);
+        centroid=fitPtr->Parameter(3);
+        fwhm=2.35482*fitPtr->Parameter(4);
         //cout << "Centroid: " << myFunc->GetParameter(3) << ", FWHM: " << 2.35*myFunc->GetParameter(4) << endl;
         cout << "Centroid: " << centroid << ", FWHM: " << fwhm << " (" << fwhm/centroid*100 << "%)" << endl;
 
@@ -109,10 +120,10 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax) {
 	myString.Prepend("histo_");
 	c1->SaveAs(myString);
 */
-   return centroid;
+   return fitPtr;
 }
 
-double fitPeak(TH1I* histo, double fitMin, double fitMax) {
+TFitResultPtr fitPeak(TH1I* histo, double fitMin, double fitMax, TString option = "S", TString goption = "") {
 
    cout << endl << "Received TH1I. Cloning to a TH1F for fitting." << endl;
    
@@ -120,5 +131,5 @@ double fitPeak(TH1I* histo, double fitMin, double fitMax) {
    str+="_th1f";
    TH1F* hist_th1f=(TH1F*)histo->Clone(str);
    
-   return fitPeak(hist_th1f,fitMin,fitMax);
+   return fitPeak(hist_th1f,fitMin,fitMax,option,goption);
 }
