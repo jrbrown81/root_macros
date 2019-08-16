@@ -14,11 +14,16 @@
 	return enh;
 }*/
 
-Double_t GetEnhancement(TH1F* hist, TString fitOpt="", TString drawOpt="", Bool_t phaseShift=0)
+TFitResultPtr GetEnhancement(TH1F* hist, TString fitOpt="", TString drawOpt="", Bool_t phaseShift=0)
+//Double_t GetEnhancement(TH1F* hist, TString fitOpt="", TString drawOpt="", Bool_t phaseShift=0)
 {
 	cout << "------------------------------" << endl;
 	cout << "Fitting " << hist->GetName() << endl;
 	cout << "------------------------------" << endl;
+	
+//	if(!fitOpt.Contains("0")) fitOpt+="0";
+	if(!fitOpt.Contains("S")) fitOpt+="S";
+//	if(!fitOpt.Contains("+")) fitOpt+="+";
 
 	TF1* cos2phi=new TF1("cos2phi","[0]*cos(2*(x+[2])*TMath::DegToRad())+[1]",-180,180);
    cos2phi->SetParName(0,"Amplitude");
@@ -30,19 +35,21 @@ Double_t GetEnhancement(TH1F* hist, TString fitOpt="", TString drawOpt="", Bool_
 	Double_t phase;
 	Double_t enh;
 	Double_t chi2;
+	Int_t ndf;
 
    Double_t mean=hist->Integral()/hist->GetNbinsX();
    
-//   cos2phi->SetParameters(1,mean);
    cos2phi->SetParameter(0,0);
    cos2phi->SetParameter(1,mean);
    cos2phi->SetParameter(2,0);
+	if(phaseShift==1) cos2phi->SetParLimits(0,-1e6,0);
    if(phaseShift==0) cos2phi->FixParameter(2,0);
-	hist->Fit(cos2phi,fitOpt,"");
+	TFitResultPtr fitResPtr=hist->Fit(cos2phi,fitOpt,"");
 	amp=cos2phi->GetParameter(0);
 	off=cos2phi->GetParameter(1);
 	phase=cos2phi->GetParameter(2);
 	chi2=cos2phi->GetChisquare();
+	ndf=fitResPtr->Ndf();
 
 	enh=(-amp+off)/(amp+off);
 
@@ -69,7 +76,7 @@ Double_t GetEnhancement(TH1F* hist, TString fitOpt="", TString drawOpt="", Bool_
 	cout << "Enhancement: " << enh << " +/- " << enh_err << endl
 		<< "Damping factor: " << damp << endl
 		<< "Corrected Enhancement: " << enh/damp << " +/- " << enh_err/damp << endl
-		<< "Chi squared: " << chi2 << endl << endl;
+		<< "Chi squared / Ndf: " << chi2 << " / " << ndf << endl << endl;
 	
 	hist->Draw(drawOpt);
    
@@ -80,7 +87,9 @@ Double_t GetEnhancement(TH1F* hist, TString fitOpt="", TString drawOpt="", Bool_
 	tl->SetNDC();
 	tl->DrawLatex(0.55,0.8,Form("Enh. = %.3f #pm %.3f",enh,enh_err));
 //   tl->DrawLatex(0.55,0.7,Form("Enh._{corr.} = %.3f #pm %.3f",enh/damp,enh_err/damp));
-   if(phaseShift==1) tl->DrawLatex(0.55,0.7,Form("Ph. shift = %.3f #pm %.3f",phase,phase_err));
+	tl->DrawLatex(0.55,0.7,Form("#chi^{2} / Ndf = %.3f / %i",chi2,ndf));
+   if(phaseShift==1) tl->DrawLatex(0.55,0.6,Form("Ph. shift = %.3f #pm %.3f",phase,phase_err));
 	
-	return enh;
+//	return enh;
+	return fitResPtr;
 }

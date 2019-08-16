@@ -2,8 +2,9 @@
 
 #include "GetEnhancement.C"
 
-void plotDphi(TString fitOpt="", TString drawOpt="", Bool_t phaseShift=0)
+void fitDphis(TString fitOpt="", TString drawOpt="", Bool_t phaseShift=0)
 {
+	TFitResultPtr fitRes;
 
 // dPhiAngle
 	TCanvas* dPhi_c=new TCanvas("dPhi_c","dPhiAngle");
@@ -40,7 +41,7 @@ void plotDphi(TString fitOpt="", TString drawOpt="", Bool_t phaseShift=0)
 	GetEnhancement(dPhiAngle_Ewin_rebin3,fitOpt,drawOpt,phaseShift);
  
 	if(phaseShift==0) dPhi_c->SaveAs("dPhiPlots" + fitOpt + ".pdf");
-	if(phaseShift==1) dPhi_c->SaveAs("dPhiPlots" + fitOpt + "ps.pdf");
+	if(phaseShift==1) dPhi_c->SaveAs("dPhiPlots" + fitOpt + "_ps.pdf");
 
 // dPhiAngle1
    TCanvas* dPhi1_c=new TCanvas("dPhi1_c","dPhiAngle1");
@@ -77,7 +78,7 @@ void plotDphi(TString fitOpt="", TString drawOpt="", Bool_t phaseShift=0)
    GetEnhancement(dPhiAngle1_Ewin_rebin3,fitOpt,drawOpt,phaseShift);
 
    if(phaseShift==0) dPhi1_c->SaveAs("dPhiPlots1" + fitOpt + ".pdf");
-   if(phaseShift==1) dPhi1_c->SaveAs("dPhiPlots1" + fitOpt + "ps.pdf");
-   
+   if(phaseShift==1) dPhi1_c->SaveAs("dPhiPlots1" + fitOpt + "_ps.pdf");
+	
    return;
 }
