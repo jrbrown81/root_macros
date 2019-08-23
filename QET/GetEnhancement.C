@@ -18,7 +18,7 @@ TFitResultPtr GetEnhancement(TH1F* hist, TString fitOpt="", TString drawOpt="", 
 //Double_t GetEnhancement(TH1F* hist, TString fitOpt="", TString drawOpt="", Bool_t phaseShift=0)
 {
 	cout << "------------------------------" << endl;
-	cout << "Fitting " << hist->GetName() << endl;
+	cout << "Fitting cos(2phi) to " << hist->GetName() << endl;
 	cout << "------------------------------" << endl;
 	
 //	if(!fitOpt.Contains("0")) fitOpt+="0";
