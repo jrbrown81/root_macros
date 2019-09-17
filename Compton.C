@@ -1,4 +1,4 @@
-void getEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)
+void GetEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)
 {
    Float_t outgoingEnergy = incomingEnergy - incomingEnergy*(1. - TMath::Cos(angle*TMath::DegToRad()))/(2. - TMath::Cos(angle*TMath::DegToRad()));
    Float_t depositedEnergy = incomingEnergy - outgoingEnergy;
@@ -17,7 +17,7 @@ void getEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)
    return;
 }
 
-void getAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEnergy)
+void GetAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEnergy)
 {
    Float_t angle = TMath::ACos(1.-depositedEnergy/(incomingEnergy-depositedEnergy))*TMath::RadToDeg();
    Float_t outgoingEnergy = incomingEnergy - depositedEnergy;
@@ -36,3 +36,8 @@ void getAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEne
    return;
 }
 
+void Help()
+{
+   cout << "GetAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEnergy), or" << endl
+	<< "GetEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)" << endl;
+}
