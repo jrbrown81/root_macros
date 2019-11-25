@@ -1,5 +1,11 @@
-void GetEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//!!!! ONLY VALID FOR E_i=511keV !!!!
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+//void GetEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)
+void GetEnergyFromAngle(const Float_t angle)
 {
+   Float_t incomingEnergy=511;
    Float_t outgoingEnergy = incomingEnergy - incomingEnergy*(1. - TMath::Cos(angle*TMath::DegToRad()))/(2. - TMath::Cos(angle*TMath::DegToRad()));
    Float_t depositedEnergy = incomingEnergy - outgoingEnergy;
    
@@ -17,8 +23,10 @@ void GetEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)
    return;
 }
 
-void GetAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEnergy)
+//void GetAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEnergy)
+void GetAngleFromEnergy(const Float_t depositedEnergy)
 {
+   Float_t incomingEnergy=511;
    Float_t angle = TMath::ACos(1.-depositedEnergy/(incomingEnergy-depositedEnergy))*TMath::RadToDeg();
    Float_t outgoingEnergy = incomingEnergy - depositedEnergy;
    
@@ -38,6 +46,8 @@ void GetAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEne
 
 void Help()
 {
-   cout << "GetAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEnergy), or" << endl
-	<< "GetEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)" << endl;
+//   cout << "GetAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEnergy), or" << endl
+//	<< "GetEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)" << endl; 
+   cout << "GetAngleFromEnergy(const Float_t depositedEnergy), or" << endl
+	<< "GetEnergyFromAngle(const Float_t angle)" << endl; 
 }

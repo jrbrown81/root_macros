@@ -81,8 +81,8 @@ TFitResultPtr GetEnhancement(TH1F* hist, TString fitOpt="", TString drawOpt="", 
 	hist->Draw(drawOpt);
    
 	TLatex *tl=new TLatex;
-//	tl->SetTextSize(0.05);
-	tl->SetTextSize(0.1);
+	tl->SetTextSize(0.05);
+//	tl->SetTextSize(0.1);
 	tl->SetTextColor(2);
 	tl->SetNDC();
 	tl->DrawLatex(0.55,0.8,Form("Enh. = %.3f #pm %.3f",enh,enh_err));
