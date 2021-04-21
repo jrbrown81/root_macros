@@ -18,27 +18,40 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax) {
 
 //	ofstream out("output.dat");
 
-        double entries=(double)histo->GetEntries();
+//        double entries=(double)histo->GetEntries();
+        double entries=(double)histo->Integral();
 // Centroid
         double centroid=(fitMax+fitMin)/2;
         Int_t minFitBin=(Int_t)histo->GetXaxis()->FindBin(fitMin);
         Int_t maxFitBin=(Int_t)histo->GetXaxis()->FindBin(fitMax);
 // Constant
-        double integral=(double)histo->Integral(minFitBin,maxFitBin);
+        double integral=(double)histo->Integral(fitMin,fitMax);
+//        double integral=(double)histo->Integral(minFitBin,maxFitBin);
         double maxConst=integral*2;
-        double minConst=integral/100;
+        double minConst=integral/1000;
+        double constant=integral;
 // Width
         double range=fitMax-fitMin;
         double fwhm=range/4;
         double maxWidth=range;
         double minWidth=range/100;
-   
+
+// Slope
+				double slope = (histo->GetBinContent(maxFitBin)-histo->GetBinContent(minFitBin))/(fitMax-fitMin);
+        double slopeMin = -2*abs(slope);
+				double slopeMax = 2*abs(slope);;
+// Offset
+        double offset = histo->GetBinContent(maxFitBin) - slope*fitMax;
+        double offMin=offset*-0.5;
+        double offMax=offset*2;
+				
 // Fit Function
         TF1* myFunc = new TF1("myFunc","[0]+[1]*x+[2]*exp(-(x-[3])**2/(2*[4]**2))",0,4095);
         myFunc->SetParNames("Offset","Slope","Constant","Mean","Sigma");
-        myFunc->SetParLimits(0,0,entries/2);
+        myFunc->SetParLimits(0,offMin,offMax);
+//        myFunc->SetParLimits(0,0,entries/2);
         //myFunc->SetParLimits(0,0,10000);
-        myFunc->SetParLimits(1,-entries/centroid,2);
+        myFunc->SetParLimits(1,slopeMin,slopeMax);
         //myFunc->SetParLimits(1,-100,2);
 //        myFunc->SetParLimits(2,5,entries);
         myFunc->SetParLimits(2,minConst,maxConst);
@@ -48,19 +61,17 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax) {
         //myFunc->SetParLimits(4,5,15000);
         //myFunc->SetParameters(1,-1,5000,peakPos,(fitMax-fitMin)/4);
 //        myFunc->SetParameters(1,-1,entries/2,centroid,fwhm);
-//        myFunc->SetParameters(1,-1,integral,centroid,fwhm);
-        myFunc->SetParameters(1,0,integral,centroid,fwhm);
+        myFunc->SetParameters(offset,slope,integral,centroid,fwhm);
+//        myFunc->SetParameters(1,0,integral,centroid,fwhm);
 
         cout << endl << "//////////////////////////////////////////////////////" << endl;
         cout << "//////////////// Fit Parameter Limits ////////////////" << endl;
-        cout << "Parameter	Min	 	Max       Guess" << endl;
-        cout << "Offset:		0		" << entries/2 << "     1" << endl;
-//        cout << "Slope:      " << -entries/centroid << "   2          -1" << endl;
-        cout << "Slope:      " << "    0     " << "   2          -1" << endl;
-//        cout << "Constant:   5      " << entries << endl;
-        cout << "Constant:       " << minConst << "           " << maxConst << "       " << integral << endl;
-        cout << "Mean:		" << fitMin << "		" << fitMax << "   " << centroid << endl;
-        cout << "Sigma:		" << minWidth << "	 	" << maxWidth << "     " << fwhm << endl;
+        cout << "Parameter	Min	 	Max     	 Guess" << endl;
+				cout << "Offset:		" << offMin << "		"	<< offMax << "     " << offset << endl;
+        cout << "Slope:      	" << slopeMin << "   	" << slopeMax	<< "		" << slope << endl;
+        cout << "Constant:       " << minConst << "          " << maxConst << "	       " << integral << endl;
+        cout << "Mean:		" << fitMin << "		" << fitMax << "   		" << centroid << endl;
+        cout << "Sigma:		" << minWidth << "	 	" << maxWidth << "	 	    " << fwhm << endl;
         cout << "//////////////////////////////////////////////////////" << endl << endl;;
         
         histo->Fit(myFunc,"","",fitMin,fitMax);
@@ -102,6 +113,17 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax) {
 //	c1->cd(1);
 	histo->GetXaxis()->SetRangeUser(fitMin*0.75,fitMax*1.25);
 	histo->Draw();
+	
+	TF1* f1=new TF1("f1","pol1",fitMin,fitMax);
+	f1->SetParameters(myFunc->GetParameter(0),myFunc->GetParameter(1));
+	f1->SetLineColor(3);
+	f1->Draw("same");
+	
+	TF1* f2=new TF1("f2","gaus",fitMin,fitMax);
+	f2->SetParameters(myFunc->GetParameter(2),myFunc->GetParameter(3),myFunc->GetParameter(4));
+	f2->SetLineColor(6);
+	f2->Draw("same");
+
 
 /*	TString myString=histo->GetTitle();
 	myString.ReplaceAll(".","p");
