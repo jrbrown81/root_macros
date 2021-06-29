@@ -62,9 +62,10 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 	for(int i=0;i<10;i++) cout << energy[i] << "		" << ordered[i] << endl;
 	
 	histo->GetXaxis()->SetRangeUser(0,ordered[0]*1.1);
-	double min=gPad->GetUymin();
-	double max=gPad->GetUymax();
-	max=10000;
+	gPad->Update();
+	cout << gPad->GetUymax() << " " << pow(10,gPad->GetUymax()) << endl;
+	double min=pow(10,gPad->GetUymin());
+	double max=pow(10,gPad->GetUymax());
 	gPad->Update();
 	TLine* tl=new TLine(0,0,1,1);
 
