@@ -144,3 +144,22 @@ double fitPeak(TH1I* histo, double fitMin, double fitMax) {
    
    return fitPeak(hist_th1f,fitMin,fitMax);
 }
+
+void help() {
+   
+   cout << endl << "Fit a Gaussian plus linear background to a defined range in a histogram." << endl
+        << "Will accept either TH1F or TH1I." << endl
+        << endl << "	fitPeak(TH1I* histo, double fitMin, double fitMax)" << endl
+	<< endl << "where 'histo' is you histogram to fit and 'fitMin' and 'fitMax' define the range over which to fit." << endl;
+
+}
+
+void Help() {
+	help();
+}
+void usage() {
+	help();
+}
+void Usage() {
+	help();
+}
