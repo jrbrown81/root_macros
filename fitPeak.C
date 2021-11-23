@@ -13,7 +13,7 @@
 #include "TLatex.h"
 
 //void fitPeak(double peakPos, double fitMin, double fitMax) {
-double fitPeak(TH1F* histo, double fitMin, double fitMax, TString opt) {
+double fitPeak(TH1F* histo, double fitMin, double fitMax, TString opt="") {
 //void fitPeak(double fitMin, double fitMax) {
 //void findAndFit(double fitMin, double fitMax) {
 
@@ -144,7 +144,7 @@ if(opt!="n") {
    return centroid;
 }
 
-double fitPeak(TH1I* histo, double fitMin, double fitMax, TString opt) {
+double fitPeak(TH1I* histo, double fitMin, double fitMax, TString opt="") {
 
    cout << endl << "Received TH1I. Cloning to a TH1F for fitting." << endl;
 
