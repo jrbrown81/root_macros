@@ -26,8 +26,7 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax, TString opt="") {
         Int_t minFitBin=(Int_t)histo->GetXaxis()->FindBin(fitMin);
         Int_t maxFitBin=(Int_t)histo->GetXaxis()->FindBin(fitMax);
 // Constant
-        double integral=(double)histo->Integral(fitMin,fitMax);
-//        double integral=(double)histo->Integral(minFitBin,maxFitBin);
+        double integral=(double)histo->Integral(minFitBin,maxFitBin);
         double maxConst=integral*2;
         double minConst=integral/1000;
         double constant=integral;
