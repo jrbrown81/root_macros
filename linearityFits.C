@@ -1,11 +1,11 @@
 // Code to fit peaks to Cs137 + Eu152 spectra
-// To run: 
-//   - create/or load a histogram, 
+// To run:
+//   - create/or load a histogram,
 //   - load the code with .L findAndFit.C
 //   - execute findAndFit(histoName,fitMin,fitMax), where fitMin/Max and the range with the 662 keV peak in
 
-#include "TF1.h"
-#include "TH1.h"
+#include <TF1.h>
+#include <TH1.h>
 #include <TMath.h>
 
 void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, double thresh=0.001)
@@ -28,7 +28,7 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 	Double_t cent=myFunc->GetParameter(3);
     Double_t sigma=myFunc->GetParameter(4);
     cout << "Raw fit values" << endl
-		<< "Centroid: " << cent << endl 
+		<< "Centroid: " << cent << endl
 		<< "FWHM: " << 2.35*sigma << endl
 		<< "Raw Resolution: " << 2.35*sigma/cent*100 << " %" << endl;
 
@@ -47,7 +47,7 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 	Int_t counter=0;
 	Double_t ordered[nFound];	// array of peaks found re-ordered by energy (largest first)
 	Int_t index[nFound];
- 
+
 	Double_t toUse[nFound];		// array of peaks to use for calibration and linearity correction
 	Double_t EtoUse[nFound];
 	char answer;
@@ -60,7 +60,7 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 	cout << endl << "First guess at peaks to use for calibration: " << endl;
 	cout << "Energy (keV)	Channel" << endl;
 	for(int i=0;i<10;i++) cout << energy[i] << "		" << ordered[i] << endl;
-	
+
 	histo->GetXaxis()->SetRangeUser(0,ordered[0]*1.1);
 	gPad->Update();
 	cout << gPad->GetUymax() << " " << pow(10,gPad->GetUymax()) << endl;
@@ -71,7 +71,7 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 
 	cout << "Accept these peaks (y/n/q): ";
 	cin >> answer;
-	
+
 	while(answer!='q') {
 		if(answer=='y') {
 			cout << "Using these peaks..." << endl;
@@ -82,7 +82,7 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 			tl->SetLineColor(2);
 			tl->SetLineStyle(2);
 			tl->SetLineWidth(2);
-			
+
 			for(int i=0; i<10; i++)
 			{
 				cout << "Use " << energy[i] << " keV peak? (y/n): ";
@@ -117,7 +117,7 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 				}
 				else if(answer=='q') break;
 			}
-			
+
 			cout << endl << "New peaks to use for calibration: " << endl;
 			cout << "Energy (keV)	Channel" << endl;
 			for(int i=0;i<nUsed;i++) cout << EtoUse[i] << "		" << toUse[i] << endl;
@@ -164,7 +164,7 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 
 	Double_t FWHM=2.35*sigma*(linFunc->GetParameter(1)+2*linFunc->GetParameter(2)*cent)*100/energy[4];
 	cout << endl << "Linearity corrected resolution: " << FWHM << " %" << endl;
-	
+
 	TString name=histo->GetName();
 
 	cout << "Save result to file '" << name << "_linearity.dat' and " << name << "_linearity.pdf'? (y/n): ";
@@ -179,14 +179,26 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 			if(nUsed==0) for(int i=0;i<nToFit;i++) out << energy[i] << "		" << ordered[i] << endl;
 			else for(int i=0;i<nUsed;i++) out << EtoUse[i] << "		" << toUse[i] << endl;
 			out.close();
-			
+
 			lin_c->SaveAs(name+"_linearity.pdf");
 			break;
 		}
 		cout << "Try again. Save results? (y/n): ";
 	}
-	
 }
+
+
+void linearityFits(TH1I* histo, double fitMin, double fitMax, int nToFit=10, double thresh=0.001)
+{
+	cout << endl << "Received TH1I. Cloning to a TH1F for fitting." << endl;
+
+	TString str=histo->GetName();
+	str+="_th1f";
+	TH1F* hist_th1f=(TH1F*)histo->Clone(str);
+
+	return linearityFits(hist_th1f,fitMin,fitMax,nToFit,thresh);
+}
+
 
 void Usage()
 {
