@@ -1,7 +1,9 @@
 ////////////////////////////////////////////////////
 //                                                //
 // Code to fit a Gausian plus a linear background //
-// to a histogram, over the specified range.      //
+// to a histogram, over the specified range and   //
+// return a pointer to the fit function.          //
+// Intended to be called my other macros.         //
 //                                                //
 // J. Brown                                       //
 // 05/01/17                                       //
@@ -11,7 +13,6 @@
 #include "TF1.h"
 #include "TH1.h"
 #include "TLatex.h"
-
 
 TFitResultPtr fitPeak2(TH1F* histo, double fitMin, double fitMax, TString myOpt="", TString opt="QS", TString gopt="") {
 
