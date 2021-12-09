@@ -77,7 +77,7 @@ TFitResultPtr fitPeak2(TH1F* histo, double fitMin, double fitMax, TString myOpt=
   TFitResultPtr fitPtr = histo->Fit(myFunc,opt,gopt,fitMin,fitMax);
   centroid=fitPtr->Parameter(3);
   fwhm=2.35482*fitPtr->Parameter(4);
-  if(myOpt.Contains("Q")) cout << "Centroid: " << centroid << ", FWHM: " << fwhm << " (" << fwhm/centroid*100 << "%)" << endl;
+  if(!myOpt.Contains("Q")) cout << "Centroid: " << centroid << ", FWHM: " << fwhm << " (" << fwhm/centroid*100 << "%)" << endl;
 
 	histo->GetXaxis()->SetRangeUser(fitMin*0.75,fitMax*1.25);
 	histo->Draw();
