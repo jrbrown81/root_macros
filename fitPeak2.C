@@ -48,8 +48,13 @@ TFitResultPtr fitPeak2(TH1F* histo, double fitMin, double fitMax, TString myOpt=
 // Fit Function
     TF1* myFunc = new TF1("myFunc","[0]+[1]*x+[2]*exp(-(x-[3])**2/(2*[4]**2))",0,4095);
     myFunc->SetParNames("Offset","Slope","Constant","Mean","Sigma");
-    myFunc->SetParLimits(0,offMin,offMax);
-    myFunc->SetParLimits(1,slopeMin,slopeMax);
+    if(myOpt.Contains("B")) {
+      myFunc->FixParameter(0,0);
+      myFunc->FixParameter(1,0);
+    } else {
+      myFunc->SetParLimits(0,offMin,offMax);
+      myFunc->SetParLimits(1,slopeMin,slopeMax);
+    }
     myFunc->SetParLimits(2,minConst,maxConst);
     myFunc->SetParLimits(3,fitMin,fitMax);
     myFunc->SetParLimits(4,minWidth,maxWidth);
@@ -92,7 +97,7 @@ TFitResultPtr fitPeak2(TH1F* histo, double fitMin, double fitMax, TString myOpt=
 	f2->SetLineColor(6);
 	f2->Draw("same");
 
-  if(!myOpt.Contains("n")) {
+  if(!myOpt.Contains("N")) {
       TLatex *tl=new TLatex;
       tl->SetTextSize(0.05);
       tl->SetTextColor(2);
@@ -124,7 +129,7 @@ TFitResultPtr fitPeak2(TH1I* histo, double fitMin, double fitMax, TString myOpt=
 //         << "Will accept either TH1F or TH1I." << endl
 //         << endl << "	fitPeak2(TH1I* histo, double fitMin, double fitMax, TString myOpt, TString opt, TString gopt)" << endl
 // 	<< endl << "where 'histo' is you histogram to fit and 'fitMin' and 'fitMax' define the range over which to fit," << endl
-//   << "and opt is an option string. Currently myOpt='n' prevents printing of fit results on the canvas." << endl;
+//   << "and opt is an option string. Currently myOpt='N' prevents printing of fit results on the canvas." << endl;
 //
 // }
 //
