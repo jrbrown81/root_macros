@@ -26,6 +26,7 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax, TString myOpt="", TStr
   double integral=(double)histo->Integral(minFitBin,maxFitBin);
   double maxConst=integral*2;
   double minConst=integral/1000;
+  double area;
   // Width
   double range=fitMax-fitMin;
   double fwhm=range/4;
@@ -54,7 +55,7 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax, TString myOpt="", TStr
   myFunc->SetParLimits(2,minConst,maxConst);
   myFunc->SetParLimits(3,fitMin,fitMax);
   myFunc->SetParLimits(4,minWidth,maxWidth);
-  myFunc->SetParameters(offset,slope,integral,centroid,fwhm);
+  myFunc->SetParameters(offset,slope,integral/2,centroid,fwhm);
 
   if(!myOpt.Contains("Q")) {
     cout << endl << "//////////////////////////////////////////////////////" << endl;
@@ -62,7 +63,7 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax, TString myOpt="", TStr
     cout << "Parameter	Min	 	Max     	 Guess" << endl;
   	cout << "Offset:		" << offMin << "		"	<< offMax << "     " << offset << endl;
     cout << "Slope:      	" << slopeMin << "   	" << slopeMax	<< "		" << slope << endl;
-    cout << "Constant:       " << minConst << "          " << maxConst << "	       " << integral << endl;
+    cout << "Constant:       " << minConst << "          " << maxConst << "	       " << integral/2 << endl;
     cout << "Mean:		" << fitMin << "		" << fitMax << "   		" << centroid << endl;
     cout << "Sigma:		" << minWidth << "	 	" << maxWidth << "	 	    " << fwhm << endl;
     cout << "//////////////////////////////////////////////////////" << endl << endl;;
@@ -71,7 +72,8 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax, TString myOpt="", TStr
   histo->Fit(myFunc,opt,gopt,fitMin,fitMax);
   centroid=myFunc->GetParameter(3);
   fwhm=2.35*myFunc->GetParameter(4);
-  if(!myOpt.Contains("Q")) cout << "Centroid: " << centroid << ", FWHM: " << fwhm << " (" << fwhm/centroid*100 << "%)" << endl;
+  area=myFunc->GetParameter(2)*myFunc->GetParameter(4)/histo->GetBinWidth(1)*pow(2*TMath::Pi(),0.5);
+  if(!myOpt.Contains("Q")) cout << "Centroid: " << centroid << ", FWHM: " << fwhm << " (" << fwhm/centroid*100 << "%), " << "Peak Area: " << area << endl;
 
 	histo->GetXaxis()->SetRangeUser(fitMin*0.75,fitMax*1.25);
 	histo->Draw();
@@ -91,9 +93,10 @@ if(!myOpt.Contains("N")) {
     tl->SetTextSize(0.05);
     tl->SetTextColor(2);
     tl->SetNDC();
-    tl->DrawLatex(0.6,0.7,Form("Centroid = %.3f",centroid));
-    tl->DrawLatex(0.6,0.65,Form("Sigma = %.3f",fwhm/2.35));
-    tl->DrawLatex(0.6,0.6,Form("FWHM = %.3f %%",fwhm/centroid*100));
+    tl->DrawLatex(0.25,0.7,Form("Centroid = %.3f",centroid));
+    tl->DrawLatex(0.25,0.65,Form("Sigma = %.3f",fwhm/2.35));
+    tl->DrawLatex(0.25,0.6,Form("FWHM = %.3f %%",fwhm/centroid*100));
+    tl->DrawLatex(0.25,0.55,Form("Area= %.3f",area));
   }
 
    return centroid;
@@ -115,11 +118,12 @@ void help() {
    cout << endl << "Fit a Gaussian plus linear background to a defined range in a histogram." << endl
         << "Will accept either TH1F or TH1I." << endl
         << endl << "	fitPeak(TH1I* histo, double fitMin, double fitMax, TString myOpt, TString opt, TString gopt)" << endl
-	<< endl << "where 'histo' is you histogram to fit and 'fitMin' and 'fitMax' define the range over which to fit," << endl
+	<< endl << "where 'histo' is your histogram to fit and 'fitMin' and 'fitMax' define the range over which to fit," << endl
   << "and myOpt is an option string." << endl
   << "'N' - prevents printing of fit results on the canvas," << endl
   << "'Q' - suppresses printing fit results to the command line," << endl
-  << "'B' - forces no background under the Gaussian." << endl;
+  << "'B' - forces no background under the Gaussian." << endl
+  << "'opt' and 'gopt' are passed directly to the 'Fit' function." << endl;
 
 }
 
