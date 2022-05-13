@@ -31,7 +31,7 @@ void processSpeDir(const char *dirname="./", const char *ext=".Spe")
          fname = file->GetName();
          if (!file->IsDirectory() && fname.EndsWith(ext)) {
             cout << fname.Data() << endl;
-			
+
 			readSpe2TH1F(fname.Data());
          }
       }
@@ -39,7 +39,7 @@ void processSpeDir(const char *dirname="./", const char *ext=".Spe")
 }
 
 void readSpe2TH1F(TString infile) {
-	
+
 	TString outfile=infile;
 	outfile.ReplaceAll(".Spe",".root");
 //	TFile *hfile=new TFile(outfile,"recreate");
@@ -54,7 +54,7 @@ void readSpe2TH1F(TString infile) {
 //	ifstream in(path + infile);
 	ifstream in(infile);
 	std::string data;
-	
+
 //	int headLines=12, tailLines=16, dataLines;
 //	int headLines=12, tailLines=16, dataLines=16384;
 	int headLines=12, tailLines=16, dataLines=8192;
@@ -71,7 +71,7 @@ void readSpe2TH1F(TString infile) {
     int i=1;
 
     infile.ReplaceAll(".Spe","");
-    infile.ReplaceAll("_"," ");
+    // infile.ReplaceAll("_"," ");
     int test=0;
     while(test==0) {
         if(!hfile->GetListOfKeys()->Contains(Form("hist%i",i))) {
@@ -107,13 +107,13 @@ void readSpe2TH1F(TString infile) {
 //	c1->cd();
 ////	histo->GetXaxis()->SetRangeUser(0,1500);
 //	histo->Draw();
-	
+
     //TString myString=histo->GetTitle();
     //myString.ReplaceAll(".","p");
     //myString.ReplaceAll("pSpe",".C");
     //myString.Prepend("histo_");
     //c1->SaveAs(myString);
-    
+
     hfile->Write();
 //    delete c1;
     hfile->Close();

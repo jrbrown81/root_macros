@@ -165,7 +165,8 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 	Double_t FWHM=2.35*sigma*(linFunc->GetParameter(1)+2*linFunc->GetParameter(2)*cent)*100/energy[4];
 	cout << endl << "Linearity corrected resolution: " << FWHM << " %" << endl;
 
-	TString name=histo->GetName();
+	// TString name=histo->GetName();
+	TString name=histo->GetTitle();
 
 	cout << "Save result to file '" << name << "_linearity.dat' and " << name << "_linearity.pdf'? (y/n): ";
 	answer=0;

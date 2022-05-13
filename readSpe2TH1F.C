@@ -8,7 +8,7 @@
 using namespace std;
 
 void readSpe2TH1F(TString infile) {
-	
+
 	TString outfile=infile;
 	outfile.ReplaceAll(".Spe",".root");
 //	TFile *hfile=new TFile(outfile,"recreate");
@@ -36,7 +36,7 @@ void readSpe2TH1F(TString infile) {
     int i=1;
 
     infile.ReplaceAll(".Spe","");
-    infile.ReplaceAll("_"," ");
+    // infile.ReplaceAll("_"," ");
     int test=0;
     while(test==0) {
         if(!hfile->GetListOfKeys()->Contains(Form("hist%i",i))) {
@@ -64,13 +64,13 @@ void readSpe2TH1F(TString infile) {
 	c1->cd();
 //	histo->GetXaxis()->SetRangeUser(0,1500);
 	histo->Draw();
-    
+
     //TString myString=histo->GetTitle();
     //myString.ReplaceAll(".","p");
     //myString.ReplaceAll("pSpe",".C");
     //myString.Prepend("histo_");
     //c1->SaveAs(myString);
-    
+
     hfile->Write();
 	hfile->Close();
 
