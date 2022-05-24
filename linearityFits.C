@@ -41,10 +41,6 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 
  	Double_t* xPos=spec->GetPositionX();	// array of peaks found, ordered by amplitude
 	Double_t energy[10]={1408,1100.87,964.1,778.9,662.1,344.2,244.7,121.7,41.075,32.061};
-	Double_t chn[10];
-	Double_t xMax=0;
-	Double_t low=0, high=8192;
-	Int_t counter=0;
 	Double_t ordered[nFound];	// array of peaks found re-ordered by energy (largest first)
 	Int_t index[nFound];
 
