@@ -49,8 +49,10 @@ TFitResultPtr fitPeak2(TH1F* histo, double fitMin, double fitMax, TString myOpt=
     TF1* myFunc = new TF1("myFunc","[0]+[1]*x+[2]*exp(-(x-[3])**2/(2*[4]**2))",0,4095);
     myFunc->SetParNames("Offset","Slope","Constant","Mean","Sigma");
     if(myOpt.Contains("B")) {
-      myFunc->FixParameter(0,0);
-      myFunc->FixParameter(1,0);
+      offset=0;
+      slope=0;
+      myFunc->FixParameter(0,offset);
+      myFunc->FixParameter(1,slope);
     } else {
       myFunc->SetParLimits(0,offMin,offMax);
       myFunc->SetParLimits(1,slopeMin,slopeMax);
