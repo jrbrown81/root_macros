@@ -48,9 +48,7 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax, TString myOpt="", TStr
   if(myOpt.Contains("B")) {
     offset=0;
     slope=0;
-    myFunc->SetParameter(0,offset);
     myFunc->FixParameter(0,offset);
-    myFunc->SetParameter(1,slope);
     myFunc->FixParameter(1,slope);
   } else {
     myFunc->SetParLimits(0,offMin,offMax);
@@ -97,10 +95,10 @@ if(!myOpt.Contains("N")) {
     tl->SetTextSize(0.05);
     tl->SetTextColor(2);
     tl->SetNDC();
-    tl->DrawLatex(0.25,0.7,Form("Centroid = %.3f",centroid));
-    tl->DrawLatex(0.25,0.65,Form("Sigma = %.3f",fwhm/2.35));
-    tl->DrawLatex(0.25,0.6,Form("FWHM = %.3f %%",fwhm/centroid*100));
-    tl->DrawLatex(0.25,0.55,Form("Area= %.3f",area));
+    tl->DrawLatex(0.6,0.7,Form("Centroid = %.3f",centroid));
+    tl->DrawLatex(0.6,0.65,Form("Sigma = %.3f",fwhm/2.35));
+    tl->DrawLatex(0.6,0.6,Form("FWHM = %.3f %%",fwhm/centroid*100));
+    tl->DrawLatex(0.6,0.55,Form("Area= %.3f",area));
   }
 
    return centroid;
