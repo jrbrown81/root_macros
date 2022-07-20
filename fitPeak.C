@@ -126,7 +126,7 @@ double fitPeak(TH1D* histo, double fitMin, double fitMax, TString myOpt="", TStr
    return fitPeak(hist_th1f,fitMin,fitMax,myOpt,opt,gopt);
 }
 
-void help() {
+void help_fitPeak() {
 
    cout << endl << "Fit a Gaussian plus linear background to a defined range in a histogram." << endl
         << "Will accept either TH1F or TH1I." << endl
@@ -140,12 +140,12 @@ void help() {
 
 }
 
-void Help() {
-	help();
+void Help_fitPeak() {
+	help_fitPeak();
 }
-void usage() {
-	help();
+void usage_fitPeak() {
+	help_fitPeak();
 }
-void Usage() {
-	help();
+void Usage_fitPeak() {
+	help_fitPeak();
 }
