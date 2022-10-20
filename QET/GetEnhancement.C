@@ -14,15 +14,18 @@
 	return enh;
 }*/
 
-TFitResultPtr GetEnhancement(TH1F* hist, TString fitOpt="", TString drawOpt="", Bool_t phaseShift=0)
+TFitResultPtr GetEnhancement(TH1F* hist, TString opt="", TString fitOpt="", TString drawOpt="", Bool_t phaseShift=0)
 //Double_t GetEnhancement(TH1F* hist, TString fitOpt="", TString drawOpt="", Bool_t phaseShift=0)
 {
-	cout << "------------------------------" << endl;
-	cout << "Fitting cos(2phi) to " << hist->GetName() << endl;
-	cout << "------------------------------" << endl;
-	
+	if(!opt.Contains("Q")) {
+		cout << "------------------------------" << endl;
+		cout << "Fitting cos(2phi) to " << hist->GetName() << endl;
+		cout << "------------------------------" << endl;
+	}
+
 //	if(!fitOpt.Contains("0")) fitOpt+="0";
 	if(!fitOpt.Contains("S")) fitOpt+="S";
+	if(opt.Contains("Q")) fitOpt+="Q";
 //	if(!fitOpt.Contains("+")) fitOpt+="+";
 
 	TF1* cos2phi=new TF1("cos2phi","[0]*cos(2*(x+[2])*TMath::DegToRad())+[1]",-180,180);
@@ -70,14 +73,15 @@ TFitResultPtr GetEnhancement(TH1F* hist, TString fitOpt="", TString drawOpt="", 
  
 	enh_err = 2/pow((off+amp),2)*sqrt(amp*amp*off_err*off_err+off*off*amp_err*amp_err);
 
-	cout << "Amplitde: " << amp << " +/- " << amp_err << endl
-		<< "Offset: " << off << "  +/- " << off_err << endl;
-	if(phaseShift==1) cout << "Phase Shift: " << phase << " +/- " << phase_err << endl;
-	cout << "Enhancement: " << enh << " +/- " << enh_err << endl
-		<< "Damping factor: " << damp << endl
-		<< "Corrected Enhancement: " << enh/damp << " +/- " << enh_err/damp << endl
-		<< "Chi squared / Ndf: " << chi2 << " / " << ndf << endl << endl;
-	
+	if(!opt.Contains("Q")) {
+		cout << "Amplitde: " << amp << " +/- " << amp_err << endl
+			<< "Offset: " << off << "  +/- " << off_err << endl;
+		if(phaseShift==1) cout << "Phase Shift: " << phase << " +/- " << phase_err << endl;
+		cout << "Enhancement: " << enh << " +/- " << enh_err << endl
+			<< "Damping factor: " << damp << endl
+			<< "Corrected Enhancement: " << enh/damp << " +/- " << enh_err/damp << endl
+			<< "Chi squared / Ndf: " << chi2 << " / " << ndf << endl << endl;
+	}	
 	hist->Draw(drawOpt);
    
 	TLatex *tl=new TLatex;

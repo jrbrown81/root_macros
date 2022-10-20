@@ -13,7 +13,7 @@ void Compton()
 	Help();
 }
 
-void GetEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)
+Float_t GetEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)
 //void GetEnergyFromAngle(const Float_t angle)
 {
 	Float_t eRestMass=511;
@@ -34,10 +34,11 @@ void GetEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)
    
    cout << "--------------------------------------" << endl;
    
-   return;
+   return outgoingEnergy;
 }
 
-void GetAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEnergy)
+Float_t GetAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEnergy)
+//void GetAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEnergy)
 //void GetAngleFromEnergy(const Float_t depositedEnergy)
 {
    Float_t eRestMass=511;
@@ -58,7 +59,7 @@ void GetAngleFromEnergy(const Float_t incomingEnergy, const Float_t depositedEne
    
    cout << "--------------------------------------" << endl;
    
-   return;
+   return angle;
 }
 
 void Help()
