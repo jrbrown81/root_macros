@@ -30,7 +30,7 @@ Float_t GetEnergyFromAngle(const Float_t incomingEnergy, const Float_t angle)
    cout << "Incoming Energy:  " << incomingEnergy << " keV" << endl
         << "Scattering angle: " << angle << " degrees" << endl
         << "Outgoing Energy:  " << outgoingEnergy << " keV" << endl
-        << "Energy deposoted: " << depositedEnergy << " keV" << endl;
+        << "Energy deposited: " << depositedEnergy << " keV" << endl;
    
    cout << "--------------------------------------" << endl;
    
@@ -55,7 +55,7 @@ Float_t GetAngleFromEnergy(const Float_t incomingEnergy, const Float_t deposited
    cout << "Incoming Energy:  " << incomingEnergy << " keV" << endl
         << "Scattering angle: " << angle << " degrees" << endl
         << "Outgoing Energy:  " << outgoingEnergy << " keV" << endl
-        << "Energy deposoted: " << depositedEnergy << " keV" << endl;
+        << "Energy deposited: " << depositedEnergy << " keV" << endl;
    
    cout << "--------------------------------------" << endl;
    
