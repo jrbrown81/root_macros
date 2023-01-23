@@ -71,3 +71,5 @@ void Help()
 }
 
 void Usage() {Help();}
+void usage() {Help();}
+void help() {Help();}
