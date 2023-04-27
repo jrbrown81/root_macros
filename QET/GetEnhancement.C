@@ -27,7 +27,8 @@ TFitResultPtr GetEnhancement(TH1F* hist, TString opt="", TString fitOpt="", TStr
 	}
 
 //	if(!fitOpt.Contains("0")) fitOpt+="0";
-	if(!fitOpt.Contains("S")) fitOpt+="S";
+	if(!fitOpt.Contains("S")) fitOpt+="S"; // need this so can return the FitResultPtr
+	if(!fitOpt.Contains("R")) fitOpt+="R"; // need this so the fit is only performed on the range of the function, i.e. -180 to 180 degrees
 	if(opt.Contains("Q")) fitOpt+="Q";
 //	if(!fitOpt.Contains("+")) fitOpt+="+";
 
@@ -37,9 +38,11 @@ TFitResultPtr GetEnhancement(TH1F* hist, TString opt="", TString fitOpt="", TStr
    cos2phi->SetParName(2,"Phase Shift");
 
 	Double_t amp;
+	Double_t amp_c;
 	Double_t off;
 	Double_t phase;
 	Double_t enh;
+	Double_t enh_c;
 	Double_t chi2;
 	Int_t ndf;
 
@@ -60,9 +63,11 @@ TFitResultPtr GetEnhancement(TH1F* hist, TString opt="", TString fitOpt="", TStr
 	enh=(-amp+off)/(amp+off);
 
 	Double_t amp_err;
+	Double_t amp_c_err;
 	Double_t off_err;
 	Double_t phase_err;
 	Double_t enh_err;
+	Double_t enh_c_err;
 
 	Double_t damp;
 
@@ -70,11 +75,16 @@ TFitResultPtr GetEnhancement(TH1F* hist, TString opt="", TString fitOpt="", TStr
 	damp=damp*TMath::DegToRad();
 	damp=TMath::Sin(damp)/damp;
 
+	amp_c=amp/damp;
+	enh_c=(-amp_c+off)/(amp_c+off);
+
 	amp_err = cos2phi->GetParError(0);
+	amp_c_err = amp_err/damp;
 	off_err=cos2phi->GetParError(1);
 	phase_err=cos2phi->GetParError(2);
 
 	enh_err = 2/pow((off+amp),2)*sqrt(amp*amp*off_err*off_err+off*off*amp_err*amp_err);
+	enh_c_err = 2/pow((off+amp_c),2)*sqrt(amp_c*amp_c*off_err*off_err+off*off*amp_c_err*amp_c_err);
 
 	if(!opt.Contains("Q")) {
 		cout << "Amplitde: " << amp << " +/- " << amp_err << endl
@@ -82,7 +92,8 @@ TFitResultPtr GetEnhancement(TH1F* hist, TString opt="", TString fitOpt="", TStr
 		if(phaseShift==1) cout << "Phase Shift: " << phase << " +/- " << phase_err << endl;
 		cout << "Enhancement: " << enh << " +/- " << enh_err << endl
 			<< "Damping factor: " << damp << endl
-			<< "Corrected Enhancement: " << enh/damp << " +/- " << enh_err/damp << endl
+			<< "Corrected Enhancement: " << enh_c << " +/- " << enh_c_err << endl
+			// << "Corrected Enhancement: " << enh/damp << " +/- " << enh_err/damp << endl
 			<< "Chi squared / Ndf: " << chi2 << " / " << ndf << endl << endl;
 	}
 	hist->Draw(drawOpt);
@@ -93,7 +104,8 @@ TFitResultPtr GetEnhancement(TH1F* hist, TString opt="", TString fitOpt="", TStr
 	tl->SetTextColor(2);
 	tl->SetNDC();
 //	tl->DrawLatex(0.55,0.8,Form("Enh. = %.3f #pm %.3f",enh,enh_err));
-	tl->DrawLatex(0.55,0.8,Form("Enh._{corr.} = %.3f #pm %.3f",enh/damp,enh_err/damp));
+	// tl->DrawLatex(0.55,0.8,Form("Enh._{corr.} = %.3f #pm %.3f",enh/damp,enh_err/damp));
+	tl->DrawLatex(0.55,0.8,Form("Enh._{corr.} = %.3f #pm %.3f",enh_c,enh_c_err));
 	tl->DrawLatex(0.55,0.7,Form("#chi^{2} / Ndf = %.3f / %i",chi2,ndf));
    if(phaseShift==1) tl->DrawLatex(0.55,0.6,Form("Ph. shift = %.3f #pm %.3f",phase,phase_err));
 
