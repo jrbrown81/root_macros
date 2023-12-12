@@ -34,8 +34,7 @@ void processSpeDir(const char *dirname="./", const char *ext=".Spe")
          fname = file->GetName();
          if (!file->IsDirectory() && fname.EndsWith(ext)) {
             cout << fname.Data() << endl;
-
-			readSpe2TH1F(fname.Data());
+						readSpe2TH1F(fname.Data());
          }
       }
    }
@@ -57,11 +56,11 @@ void readSpe2TH1F(TString infile) {
 
 	int i_data;
 
-    TH1F* histo;
-    TString hist_str="hist";
-    int i=1;
+  TH1F* histo;
+  TString hist_str="hist";
+  int i=1;
 
-    infile.ReplaceAll(".Spe","");
+  infile.ReplaceAll(".Spe","");
 
 	while(!in.eof()) {
 		getline(in,data);
@@ -73,6 +72,7 @@ void readSpe2TH1F(TString infile) {
 			dataLines++;
 			cout << dataLines << " lines of data to be read" << endl;
       int test=0;
+			// loop over objects in the spectr.root file and find an unused histogram name
       while(test==0) {
           if(!hfile->GetListOfKeys()->Contains(Form("hist%i",i))) {
               histo=new TH1F(Form("hist%i",i),infile,dataLines,0,dataLines-1);
@@ -88,7 +88,7 @@ void readSpe2TH1F(TString infile) {
 		}
 	}
 
-    hfile->Write();
-    hfile->Close();
+  hfile->Write();
+  hfile->Close();
 
 }

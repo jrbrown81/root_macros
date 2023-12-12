@@ -8,7 +8,7 @@
 #include <TH1.h>
 #include <TMath.h>
 
-void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, double thresh=0.001)
+void linearityFits(TH1F* histo, double fitMin, double fitMax, double thresh=0, int nToFit=10, double peakThresh=0.001)
 {
 	if(nToFit>10) nToFit=10;
 
@@ -36,8 +36,9 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 	gPad->SetLogy(1);
 	histo->Draw();
 	TSpectrum* spec=new TSpectrum();
-	histo->GetXaxis()->UnZoom();
-    Int_t nFound=spec->Search(histo,sigma,"",thresh);
+	histo->GetXaxis()->SetRangeUser(thresh,histo->GetNbinsX());
+	// histo->GetXaxis()->UnZoom();
+    Int_t nFound=spec->Search(histo,sigma,"",peakThresh);
 
  	Double_t* xPos=spec->GetPositionX();	// array of peaks found, ordered by amplitude
 	Double_t energy[10]={1408,1100.87,964.1,778.9,662.1,344.2,244.7,121.7,41.075,32.061};
@@ -185,7 +186,7 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, dou
 }
 
 
-void linearityFits(TH1I* histo, double fitMin, double fitMax, int nToFit=10, double thresh=0.001)
+void linearityFits(TH1I* histo, double fitMin, double fitMax, double thresh=0, int nToFit=10, double peakThresh=0.001)
 {
 	cout << endl << "Received TH1I. Cloning to a TH1F for fitting." << endl;
 
@@ -193,16 +194,17 @@ void linearityFits(TH1I* histo, double fitMin, double fitMax, int nToFit=10, dou
 	str+="_th1f";
 	TH1F* hist_th1f=(TH1F*)histo->Clone(str);
 
-	return linearityFits(hist_th1f,fitMin,fitMax,nToFit,thresh);
+	return linearityFits(hist_th1f,fitMin,fitMax,thresh,nToFit,peakThresh);
 }
 
 
 void Usage()
 {
-	cout << endl << "linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, double thresh=0.001) \n\n"
+	cout << endl << "linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, double peakThresh=0.001) \n\n"
 		<< "Use 'fitMin' and 'fitMax' to set range to fit 662 keV peak in 'histo'. \n"
+		<< "Use 'thresh' to set a low energy threshold to the spectrum to cut out the noise (default is 0). \n"
 		<< "Use 'nToFit' to limit number of peaks to use for linearity correction (highest energy peaks will be used). \n"
-		<< "'thresh' can be used to adjust minimum amplitude of peaks that will be fitted.\n" << endl;
+		<< "'peakThresh' can be used to adjust minimum amplitude of peaks that will be fitted.\n" << endl;
 }
 
 void usage() { Usage();}
