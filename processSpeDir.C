@@ -33,7 +33,7 @@ void processSpeDir(const char *dirname="./", const char *ext=".Spe")
       while ((file=(TSystemFile*)next())) {
          fname = file->GetName();
          if (!file->IsDirectory() && fname.EndsWith(ext)) {
-            cout << fname.Data() << endl;
+            // cout << fname.Data() << endl;
 						readSpe2TH1F(fname.Data());
          }
       }
@@ -46,7 +46,6 @@ void readSpe2TH1F(TString infile) {
 	outfile.ReplaceAll(".Spe",".root");
   TFile *hfile=new TFile("spectra.root","update");
 
-	cout << "Plotting histogram from file: " << infile << endl << endl;
 
 	ifstream in(infile);
 	std::string data;
@@ -62,6 +61,25 @@ void readSpe2TH1F(TString infile) {
 
   infile.ReplaceAll(".Spe","");
 
+// check if this file is already in specrta.root
+	TIter myItr(hfile->GetListOfKeys());
+	TKey* key;
+	TString str;
+	Bool_t exists=kFALSE;
+	while((key=(TKey*)myItr())) {
+		str=(TString)key->GetTitle();
+		if(str.EqualTo(infile)) {
+			hfile->Close();
+			exists=kTRUE;
+			break;
+		}
+	}
+	if(exists) {
+		cout << infile << " already exists within spectra.root. Skipping..." << endl;
+		return;
+	} else cout << "Plotting histogram from file: " << infile << endl << endl;
+
+// read the file line-by-line
 	while(!in.eof()) {
 		getline(in,data);
 		lineNo++;
@@ -90,5 +108,7 @@ void readSpe2TH1F(TString infile) {
 
   hfile->Write();
   hfile->Close();
+
+	return;
 
 }
