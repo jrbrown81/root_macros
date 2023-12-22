@@ -8,8 +8,10 @@
 #include <TH1.h>
 #include <TMath.h>
 
-void linearityFits(TH1F* histo, double fitMin, double fitMax, double thresh=0, int nToFit=10, double peakThresh=0.001)
+void linearityFits(TH1F* histo, double fitMin, double fitMax, double searchMin=0, double searchMax=0, int nToFit=10, double peakThresh=0.001)
 {
+	gStyle->SetOptStat(0);
+
 	if(nToFit>10) nToFit=10;
 
 	TCanvas* lin_c=new TCanvas("lin_c","Linearity fits",0,0,800,800);
@@ -24,21 +26,23 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, double thresh=0, i
     myFunc->SetParLimits(4,5,500);
     myFunc->SetParameters(100,-1,5000,peakPos,100);
 
-    histo->Fit(myFunc,"q","",fitMin,fitMax);
+    histo->Fit(myFunc,"q","hist",fitMin,fitMax);
 	Double_t cent=myFunc->GetParameter(3);
     Double_t sigma=myFunc->GetParameter(4);
+		Double_t fwhm=2.35*sigma/cent*100;
     cout << "Raw fit values" << endl
 		<< "Centroid: " << cent << endl
 		<< "FWHM: " << 2.35*sigma << endl
-		<< "Raw Resolution: " << 2.35*sigma/cent*100 << " %" << endl;
+		<< "Raw Resolution: " << fwhm << " %" << endl;
 
 	lin_c->cd(1);
 	gPad->SetLogy(1);
-	histo->Draw();
+	histo->Draw("");
 	TSpectrum* spec=new TSpectrum();
-	histo->GetXaxis()->SetRangeUser(thresh,histo->GetNbinsX());
+	if(searchMax==0) histo->GetXaxis()->SetRangeUser(searchMin,histo->GetNbinsX());
+	else histo->GetXaxis()->SetRangeUser(searchMin,searchMax);
 	// histo->GetXaxis()->UnZoom();
-    Int_t nFound=spec->Search(histo,sigma,"",peakThresh);
+  Int_t nFound=spec->Search(histo,sigma,"",peakThresh);
 
  	Double_t* xPos=spec->GetPositionX();	// array of peaks found, ordered by amplitude
 	Double_t energy[10]={1408,1100.87,964.1,778.9,662.1,344.2,244.7,121.7,41.075,32.061};
@@ -80,7 +84,8 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, double thresh=0, i
 			tl->SetLineStyle(2);
 			tl->SetLineWidth(2);
 
-			for(int i=0; i<10; i++)
+			// for(int i=0; i<10; i++)
+			for(int i=0; i<nToFit; i++)
 			{
 				cout << "Use " << energy[i] << " keV peak? (y/n): ";
 				cin >> answer;
@@ -96,6 +101,10 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, double thresh=0, i
 						cout << "	Use: " << ordered[fit] <<" ? (y/n): ";
 						cin >> answer;
 						if(answer=='y') {
+							tl->SetLineColor(3);
+							tl->DrawLine(ordered[fit],min,ordered[fit],max);
+							gPad->Update();
+							tl->SetLineColor(2);
 							toUse[nUsed]=ordered[fit];
 							EtoUse[nUsed]=energy[i];
 							fit++;
@@ -132,12 +141,14 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, double thresh=0, i
 
  	lin_c->cd(1);
 	histo->GetXaxis()->SetRangeUser(fitMin*0.75,fitMax*1.25);
-	histo->DrawCopy();
+	histo->DrawCopy("");
 
 	lin_c->cd(2);
 	gPad->SetLogy(1);
-	histo->GetXaxis()->SetRangeUser(0,ordered[0]*1.1);
-	histo->DrawCopy();
+	if(nUsed==0)  histo->GetXaxis()->SetRangeUser(0,ordered[0]*1.1);
+	else histo->GetXaxis()->SetRangeUser(0,toUse[0]*1.1);
+	histo->DrawCopy("");
+	tl->SetLineColor(3);
 	for(int i=0;i<nUsed;i++) tl->DrawLine(toUse[i],min,toUse[i],max);
 
 	TGraph *gr;
@@ -160,7 +171,18 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, double thresh=0, i
 	gPad->Update();
 
 	Double_t FWHM=2.35*sigma*(linFunc->GetParameter(1)+2*linFunc->GetParameter(2)*cent)*100/energy[4];
-	cout << endl << "Linearity corrected resolution: " << FWHM << " %" << endl;
+
+	cout << endl << "Raw resolution: " << fwhm << " %" << endl;
+	cout << "Linearity corrected resolution: " << FWHM << " %" << endl << endl;
+
+	TLatex *tex=new TLatex;
+	tex->SetTextSize(0.1);
+	tex->SetTextColor(2);
+	tex->SetNDC();
+	lin_c->cd(1);
+	tex->DrawLatex(0.15,0.75,Form("FWHM_{raw} = %.3f %%",fwhm));
+	tex->DrawLatex(0.15,0.6,Form("FWHM_{corr.} = %.3f %%",FWHM));
+	gPad->Update();
 
 	// TString name=histo->GetName();
 	TString name=histo->GetTitle();
@@ -181,20 +203,29 @@ void linearityFits(TH1F* histo, double fitMin, double fitMax, double thresh=0, i
 			lin_c->SaveAs(name+"_linearity.pdf");
 			break;
 		}
-		cout << "Try again. Save results? (y/n): ";
+		else if(answer!='n') cout << "Try again. Save results? (y/n): ";
 	}
+
+	return;
 }
 
 
-void linearityFits(TH1I* histo, double fitMin, double fitMax, double thresh=0, int nToFit=10, double peakThresh=0.001)
+void linearityFits(TH1I* histo, double fitMin, double fitMax, double searchMin=0, double searchMax=0, int nToFit=10, double peakThresh=0.001)
 {
 	cout << endl << "Received TH1I. Cloning to a TH1F for fitting." << endl;
-
 	TString str=histo->GetName();
 	str+="_th1f";
 	TH1F* hist_th1f=(TH1F*)histo->Clone(str);
+	return linearityFits(hist_th1f,fitMin,fitMax,searchMin,searchMax,nToFit,peakThresh);
+}
 
-	return linearityFits(hist_th1f,fitMin,fitMax,thresh,nToFit,peakThresh);
+void linearityFits(TH1D* histo, double fitMin, double fitMax, double searchMin=0, double searchMax=0, int nToFit=10, double peakThresh=0.001)
+{
+	cout << endl << "Received TH1D. Cloning to a TH1F for fitting." << endl;
+	TString str=histo->GetName();
+	str+="_th1f";
+	TH1F* hist_th1f=(TH1F*)histo->Clone(str);
+	return linearityFits(hist_th1f,fitMin,fitMax,searchMin,searchMax,nToFit,peakThresh);
 }
 
 
@@ -202,9 +233,9 @@ void Usage()
 {
 	cout << endl << "linearityFits(TH1F* histo, double fitMin, double fitMax, int nToFit=10, double peakThresh=0.001) \n\n"
 		<< "Use 'fitMin' and 'fitMax' to set range to fit 662 keV peak in 'histo'. \n"
-		<< "Use 'thresh' to set a low energy threshold to the spectrum to cut out the noise (default is 0). \n"
+		<< "Use 'searchMin' and 'searchMax' to set a the range of the spectrum to search over (defaults are 0, i.e. whole range). \n"
 		<< "Use 'nToFit' to limit number of peaks to use for linearity correction (highest energy peaks will be used). \n"
-		<< "'peakThresh' can be used to adjust minimum amplitude of peaks that will be fitted.\n" << endl;
+		<< "'peakThresh' can be used to adjust minimum amplitude (as fraction of maximum) of peaks that will be fitted.\n" << endl;
 }
 
 void usage() { Usage();}
