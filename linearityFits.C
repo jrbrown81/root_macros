@@ -2,7 +2,7 @@
 // To run:
 //   - create/or load a histogram,
 //   - load the code with .L findAndFit.C
-//   - execute findAndFit(histoName,fitMin,fitMax), where fitMin/Max and the range with the 662 keV peak in
+//   - execute findAndFit(histoName,fitMin,fitMax), where fitMin/Max are the range with the 662 keV peak in
 
 #include <TF1.h>
 #include <TH1.h>
