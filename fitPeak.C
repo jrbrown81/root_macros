@@ -50,6 +50,8 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax, TString myOpt="", TStr
     slope=0;
     myFunc->FixParameter(0,offset);
     myFunc->FixParameter(1,slope);
+
+		cout << "myOpt 'B' requested so fitting with no linear background" << endl;
   } else {
     myFunc->SetParLimits(0,offMin,offMax);
     myFunc->SetParLimits(1,slopeMin,slopeMax);
@@ -77,8 +79,10 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax, TString myOpt="", TStr
   area=myFunc->GetParameter(2)*myFunc->GetParameter(4)/histo->GetBinWidth(1)*pow(2*TMath::Pi(),0.5);
   if(!myOpt.Contains("Q")) cout << "Centroid: " << centroid << ", FWHM: " << fwhm << " (" << fwhm/centroid*100 << "%), " << "Peak Area: " << area << endl;
 
+// Draw the histogram, fit and deconvolution
 	histo->GetXaxis()->SetRangeUser(fitMin*0.75,fitMax*1.25);
-	histo->Draw();
+	histo->Draw(gopt);
+	myFunc->Draw("same");
 
 	TF1* f1=new TF1("f1","pol1",fitMin,fitMax);
 	f1->SetParameters(myFunc->GetParameter(0),myFunc->GetParameter(1));
@@ -90,6 +94,7 @@ double fitPeak(TH1F* histo, double fitMin, double fitMax, TString myOpt="", TStr
 	f2->SetLineColor(6);
 	f2->Draw("same");
 
+// Draw fit parameters on canvas
 if(!myOpt.Contains("N")) {
     TLatex *tl=new TLatex;
     tl->SetTextSize(0.05);
