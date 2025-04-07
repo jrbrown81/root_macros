@@ -129,7 +129,8 @@ TF1* fitAlphas(double rangeMin, double rangeMax, std::vector<double>peaks,bool v
     double maxArea = h->GetEntries();
 
     double lim_Area[2]  = {1, maxArea};            // Area
-    double lim_sigma[3] = {10, 2, 20};         // sigma
+    double lim_sigma[3] = {10, 2, 200};         // sigma
+    // double lim_sigma[3] = {10, 2, 20};         // sigma
 
     int x1 = h->GetBin(rangeMin);
     int x2 = h->GetBin(rangeMax);
