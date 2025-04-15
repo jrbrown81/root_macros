@@ -11,10 +11,11 @@
 TRandom3 rng(0);
 vector<double> Am241Energies={5388,5442.80,5485.56};
 vector<double> Am241Intensities={1.660,13.1,84.8};
+// Pu239, Am241, Cm244
+vector<double> tripleAlphaEnergies={5155,5485.56,5805};
 
 TH1F *autoGetHist1D()
 {
-
     TPad *current_pad = (TPad *)gROOT->GetSelectedPad();
 
     TIter next(current_pad->GetListOfPrimitives());
@@ -35,14 +36,11 @@ TH1F *autoGetHist1D()
 
 TH1F *agh()
 {
-
     return autoGetHist1D();
-
 }
 
 TGraph *autoGetGraph()
 {
-
     TPad *current_pad = (TPad *)gROOT->GetSelectedPad();
 
     TIter next(current_pad->GetListOfPrimitives());
@@ -69,8 +67,6 @@ TCanvas *autoGetCanvas()
 {
     TPad *current_pad = (TPad *)gROOT->GetSelectedPad();
     return  (TCanvas *)current_pad->GetCanvas();
-
-
 }
 
 
@@ -101,7 +97,6 @@ void prettyH(TH1F *h = NULL)
 
 void aLab(TH1F *h = NULL)
 {
-
     if (h == NULL)
         h = autoGetHist1D();
     h->GetXaxis()->SetTitle("E#alpha [keV]");
@@ -109,6 +104,7 @@ void aLab(TH1F *h = NULL)
     h->GetYaxis()->SetTitle(Form("Counts / (%.2f keV)", h->GetBinWidth(1)));
 }
 
+// Note that this currently uses Am241 intensities for initial guesses so could cause problems
 TF1* fitAlphas(double rangeMin, double rangeMax, std::vector<double>peaks,bool verbose = true,TH1F *h = autoGetHist1D(),bool effCorrection = false, TString fitOpt = "RN",bool noBG = false)
 {
     const int noPeaks = peaks.size();
@@ -218,6 +214,17 @@ TF1* fitAm241(double rangeMin, double rangeMax, TH1F *h = autoGetHist1D(), TStri
 	double guess5388 = Am241Energies[0] / roughGain;
 
 	return fitAlphas(rangeMin,rangeMax,{guess5388,guess5442,rough5845},true,h,false,"RN",false);
+}
+
+// note that fitAlphas uses Am241 intensities for initial guess of amplitude so may not work correctly
+TF1* fitTripleAlpha(double rangeMin, double rangeMax, TH1F *h = autoGetHist1D(), TString fitOpt = "RN",bool noBG = false)
+{
+	double rough5845 = h->GetMaximumBin();
+	double roughGain = tripleAlphaEnergies[1] / rough5845;
+	double guess5155 = tripleAlphaEnergies[0] / roughGain;
+	double guess5805 = tripleAlphaEnergies[2] / roughGain;
+
+	return fitAlphas(rangeMin,rangeMax,{guess5155,rough5845,guess5805 },true,h,false,"RN",false);
 }
 
 vector<double> calibrate(TH1F* h=autoGetHist1D(),double xmin=1000, double xmax=1200)
@@ -405,4 +412,31 @@ double FindFWHMuncalibrated(double xmin, double xmax, bool useLinFit=0, TH1F* hi
 	if(useLinFit) gain=linFit[1];
 
 	return FindFWHM(fit,xmin,hist->GetMaximumBin(),xmax)*gain;
+}
+
+void PrintAm241()
+{
+	cout << "==================================" << endl;
+	cout << "               Am241              " << endl;
+	cout << "==================================" << endl;
+	cout << "Energy (keV)	Intensity (%)" << endl;
+	cout << "----------------------------------" << endl;
+	for(int i=0;i<3;i++) {
+		cout << Am241Energies[i] << "		" << Am241Intensities[i] << endl;
+	}
+	cout << "==================================" << endl;
+}
+
+void PrintTripleAlpha()
+{
+	cout << "==================================" << endl;
+	cout << "        Pu239 Am241 Cm244         " << endl;
+	cout << "==================================" << endl;
+	cout << "Isotope		Energy (keV)" << endl;
+	cout << "----------------------------------" << endl;
+	TString iso[3]={"Pu239","Am241","Cm244"};
+	for(int i=0;i<3;i++) {
+		cout << iso[i] << "		" << tripleAlphaEnergies[i] << endl;
+	}
+	cout << "==================================" << endl;
 }
