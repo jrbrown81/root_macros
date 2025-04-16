@@ -14,95 +14,95 @@ vector<double> Am241Intensities={1.660,13.1,84.8};
 // Pu239, Am241, Cm244
 vector<double> tripleAlphaEnergies={5155,5485.56,5805};
 
-TH1F *autoGetHist1D()
-{
-    TPad *current_pad = (TPad *)gROOT->GetSelectedPad();
-
-    TIter next(current_pad->GetListOfPrimitives());
-    TObject *obj;
-    int iterCount = 0;
-    while ((obj = next()) && iterCount < 30)
-    {
-        if (obj->IsA()->InheritsFrom(TH1::Class()))
-        {
-            return (TH1F *)obj;
-        }
-    }
-
-    cout << "couldn't find a 1D histo" << endl;
-    return NULL;
-}
-
-
-TH1F *agh()
-{
-    return autoGetHist1D();
-}
-
-TGraph *autoGetGraph()
-{
-    TPad *current_pad = (TPad *)gROOT->GetSelectedPad();
-
-    TIter next(current_pad->GetListOfPrimitives());
-    TObject *obj;
-    int iterCount = 0;
-    while ((obj = next()) && iterCount < 30)
-    {
-        if (obj->IsA()->InheritsFrom(TGraph::Class()))
-        {
-            return (TGraph *)obj;
-        }
-    }
-
-    cout << "couldn't find a 1D histo" << endl;
-    return NULL;
-}
-
-TPad *autoGetPad()
-{
-    return (TPad *)gROOT->GetSelectedPad();
-}
-
-TCanvas *autoGetCanvas()
-{
-    TPad *current_pad = (TPad *)gROOT->GetSelectedPad();
-    return  (TCanvas *)current_pad->GetCanvas();
-}
-
-
-void logy()
-{
-    TPad *current_pad = (TPad *)gROOT->GetSelectedPad();
-    if (current_pad != NULL)
-        current_pad->SetLogy(!current_pad->GetLogy());
-    else
-        cout << "No current pad - skipping!" << endl;
-}
-
-void prettyH(TH1F *h = NULL)
-{
-    if (h == NULL)
-        h = autoGetHist1D();
-
-    h->GetXaxis()->SetLabelOffset(0.043);
-    h->GetYaxis()->SetTickLength(-0.015);
-    h->GetXaxis()->SetTickLength(-0.05);
-    h->GetXaxis()->CenterTitle();
-    h->GetYaxis()->CenterTitle();
-    h->GetXaxis()->SetTitleOffset(1.6);
-    h->SetLineColor(kBlack);
-    h->Draw();
-}
-
-
-void aLab(TH1F *h = NULL)
-{
-    if (h == NULL)
-        h = autoGetHist1D();
-    h->GetXaxis()->SetTitle("E#alpha [keV]");
-
-    h->GetYaxis()->SetTitle(Form("Counts / (%.2f keV)", h->GetBinWidth(1)));
-}
+//TH1F *autoGetHist1D()
+//{
+    //TPad *current_pad = (TPad *)gROOT->GetSelectedPad();
+//
+    //TIter next(current_pad->GetListOfPrimitives());
+    //TObject *obj;
+    //int iterCount = 0;
+    //while ((obj = next()) && iterCount < 30)
+    //{
+        //if (obj->IsA()->InheritsFrom(TH1::Class()))
+        //{
+            //return (TH1F *)obj;
+        //}
+    //}
+//
+    //cout << "couldn't find a 1D histo" << endl;
+    //return NULL;
+//}
+//
+//
+//TH1F *agh()
+//{
+    //return autoGetHist1D();
+//}
+//
+//TGraph *autoGetGraph()
+//{
+    //TPad *current_pad = (TPad *)gROOT->GetSelectedPad();
+//
+    //TIter next(current_pad->GetListOfPrimitives());
+    //TObject *obj;
+    //int iterCount = 0;
+    //while ((obj = next()) && iterCount < 30)
+    //{
+        //if (obj->IsA()->InheritsFrom(TGraph::Class()))
+        //{
+            //return (TGraph *)obj;
+        //}
+    //}
+//
+    //cout << "couldn't find a 1D histo" << endl;
+    //return NULL;
+//}
+//
+//TPad *autoGetPad()
+//{
+    //return (TPad *)gROOT->GetSelectedPad();
+//}
+//
+//TCanvas *autoGetCanvas()
+//{
+    //TPad *current_pad = (TPad *)gROOT->GetSelectedPad();
+    //return  (TCanvas *)current_pad->GetCanvas();
+//}
+//
+//
+//void logy()
+//{
+    //TPad *current_pad = (TPad *)gROOT->GetSelectedPad();
+    //if (current_pad != NULL)
+        //current_pad->SetLogy(!current_pad->GetLogy());
+    //else
+        //cout << "No current pad - skipping!" << endl;
+//}
+//
+//void prettyH(TH1F *h = NULL)
+//{
+    //if (h == NULL)
+        //h = autoGetHist1D();
+//
+    //h->GetXaxis()->SetLabelOffset(0.043);
+    //h->GetYaxis()->SetTickLength(-0.015);
+    //h->GetXaxis()->SetTickLength(-0.05);
+    //h->GetXaxis()->CenterTitle();
+    //h->GetYaxis()->CenterTitle();
+    //h->GetXaxis()->SetTitleOffset(1.6);
+    //h->SetLineColor(kBlack);
+    //h->Draw();
+//}
+//
+//
+//void aLab(TH1F *h = NULL)
+//{
+    //if (h == NULL)
+        //h = autoGetHist1D();
+    //h->GetXaxis()->SetTitle("E#alpha [keV]");
+//
+    //h->GetYaxis()->SetTitle(Form("Counts / (%.2f keV)", h->GetBinWidth(1)));
+//}
 
 // Note that this currently uses Am241 intensities for initial guesses so could cause problems
 TF1* fitAlphas(double rangeMin, double rangeMax, std::vector<double>peaks,bool verbose = true,TH1F *h = autoGetHist1D(),bool effCorrection = false, TString fitOpt = "RN",bool noBG = false)
