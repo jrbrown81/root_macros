@@ -56,6 +56,11 @@ TPad *autoGetPad()
 TCanvas *autoGetCanvas()
 {
     TPad *current_pad = (TPad *)gROOT->GetSelectedPad();
+		TCanvas* newCanvas;
+		if(!current_pad) {
+			cout << "couldn't find a convas" << endl;
+			return NULL;
+		}
     return  (TCanvas *)current_pad->GetCanvas();
 }
 
