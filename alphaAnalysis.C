@@ -105,7 +105,7 @@ vector<double> tripleAlphaEnergies={5155,5485.56,5805};
 //}
 
 // Note that this currently uses Am241 intensities for initial guesses so could cause problems
-TF1* fitAlphas(double rangeMin, double rangeMax, std::vector<double>peaks,bool verbose = true,TH1F *h = autoGetHist1D(),bool effCorrection = false, TString fitOpt = "RN",bool noBG = false)
+TF1* fitAlphas(double rangeMin, double rangeMax, std::vector<double>peaks,bool verbose = true,TH1F *hist = autoGetHist1D(),bool effCorrection = false, TString fitOpt = "RN",bool noBG = false)
 {
     const int noPeaks = peaks.size();
     if (noPeaks==0)
@@ -116,24 +116,26 @@ TF1* fitAlphas(double rangeMin, double rangeMax, std::vector<double>peaks,bool v
     double binFactor;
     double binF;
 
-    if(h==NULL)
+    if(hist==NULL)
     {
         cout<<"Give me a histo!"<<endl;
         return NULL;
     }
 
-    double maxArea = h->GetEntries();
+		cout << "Fitting peaks..." << endl;
+
+    double maxArea = hist->GetEntries();
 
     double lim_Area[2]  = {1, maxArea};            // Area
     double lim_sigma[3] = {10, 2, 200};         // sigma
     // double lim_sigma[3] = {10, 2, 20};         // sigma
 
-    int x1 = h->GetBin(rangeMin);
-    int x2 = h->GetBin(rangeMax);
-    double y1 = h->GetBinContent(x1);
-    double y2 = h->GetBinContent(x2);
+    int x1 = hist->GetBin(rangeMin);
+    int x2 = hist->GetBin(rangeMax);
+    double y1 = hist->GetBinContent(x1);
+    double y2 = hist->GetBinContent(x2);
 
-    binFactor = h->GetBinWidth(1);
+    binFactor = hist->GetBinWidth(1);
 
     double grad = (y2-y1)/(x2-x1);
     double offs = y2 - grad*x2;
@@ -151,7 +153,7 @@ TF1* fitAlphas(double rangeMin, double rangeMax, std::vector<double>peaks,bool v
 
     for(int i =0;i<noPeaks;i++)
     {
-        f1->SetParameter(f1->GetParNumber(Form("A%i",i)),h->GetBinContent(h->FindBin(peaks[2]))*Am241Intensities[i]/100);
+        f1->SetParameter(f1->GetParNumber(Form("A%i",i)),hist->GetBinContent(hist->FindBin(peaks[2]))*Am241Intensities[i]/100);
         // f1->SetParameter(f1->GetParNumber(Form("A%i",i)),h->GetBinContent(h->FindBin(peaks[i])));
         f1->SetParLimits(f1->GetParNumber(Form("A%i",i)),lim_Area[0],2.*lim_Area[1]);
         f1->SetParameter(f1->GetParNumber(Form("M%i",i)),peaks[i]);
@@ -167,8 +169,13 @@ TF1* fitAlphas(double rangeMin, double rangeMax, std::vector<double>peaks,bool v
     f1->SetParLimits(f1->GetParNumber("N"),10,100.);
     f1->SetParameter(f1->GetParNumber("offset"),0.);
 
+		TCanvas* alphaFit_c = new TCanvas("alphaFit","Fits to alpha peaks");
+		TH1F* alphaFit_h=(TH1F*)hist->Clone();
+		alphaFit_h->GetXaxis()->SetRangeUser(rangeMin,rangeMax);
+		alphaFit_h->DrawCopy("hist");
+
     if(!verbose) fitOpt = "QRN";
-    h->Fit(f1,fitOpt);
+    alphaFit_h->Fit(f1,fitOpt);
 
     for(int i = 0; i<noPeaks;i++)
     {
@@ -206,42 +213,49 @@ TF1* fitAlphas(double rangeMin, double rangeMax, std::vector<double>peaks,bool v
     return f1;
 }
 
-TF1* fitAm241(double rangeMin, double rangeMax, TH1F *h = autoGetHist1D(), TString fitOpt = "RN",bool noBG = false)
+TF1* fitAm241(double rangeMin, double rangeMax, TH1F *hist = autoGetHist1D(), TString fitOpt = "RN",bool noBG = false)
 {
-	double rough5845 = h->GetMaximumBin();
+	double rough5845 = hist->GetMaximumBin();
 	double roughGain = Am241Energies[2] / rough5845;
 	double guess5442 = Am241Energies[1] / roughGain;
 	double guess5388 = Am241Energies[0] / roughGain;
 
-	return fitAlphas(rangeMin,rangeMax,{guess5388,guess5442,rough5845},true,h,false,"RN",false);
+	return fitAlphas(rangeMin,rangeMax,{guess5388,guess5442,rough5845},true,hist,false,"RN",false);
 }
 
 // note that fitAlphas uses Am241 intensities for initial guess of amplitude so may not work correctly
-TF1* fitTripleAlpha(double rangeMin, double rangeMax, TH1F *h = autoGetHist1D(), TString fitOpt = "RN",bool noBG = false)
+TF1* fitTripleAlpha(double rangeMin, double rangeMax, TH1F *hist = autoGetHist1D(), TString fitOpt = "RN",bool noBG = false)
 {
-	double rough5845 = h->GetMaximumBin();
+	double rough5845 = hist->GetMaximumBin();
 	double roughGain = tripleAlphaEnergies[1] / rough5845;
 	double guess5155 = tripleAlphaEnergies[0] / roughGain;
 	double guess5805 = tripleAlphaEnergies[2] / roughGain;
 
-	return fitAlphas(rangeMin,rangeMax,{guess5155,rough5845,guess5805 },true,h,false,"RN",false);
+	return fitAlphas(rangeMin,rangeMax,{guess5155,rough5845,guess5805 },true,hist,false,"RN",false);
 }
 
-vector<double> calibrate(TH1F* h=autoGetHist1D(),double xmin=1000, double xmax=1200)
+vector<double> calibrate(TH1F* hist=autoGetHist1D(),TF1* f=NULL, double xmin=1000, double xmax=1200)
+// vector<double> calibrate(TH1F* hist=autoGetHist1D(),double xmin=1000, double xmax=1200)
 {
+	cout << "Calibrating..." << endl;
 // vector<double> calibrate(TH1F* h, TFile *out, TDirectory *dir,int runNo) {
 	// Rough estimates
-	double rough5845 = h->GetMaximumBin();
-	double roughGain = Am241Energies[2] / rough5845;
-	double guess5442 = Am241Energies[1] / roughGain;
-	double guess5388 = Am241Energies[0] / roughGain;
-	cout << guess5388 << " " << guess5442 << " " << rough5845 << endl;
+	// double rough5845 = hist->GetMaximumBin();
+	// double roughGain = Am241Energies[2] / rough5845;
+	// double guess5442 = Am241Energies[1] / roughGain;
+	// double guess5388 = Am241Energies[0] / roughGain;
+	//
+	// cout << "First guess at peak positions: ";
+	// cout << guess5388 << ", " << guess5442 << ", " << rough5845 << endl;
 
-	TCanvas *c = new TCanvas(Form("uncal_Fitted_alpha_peaks"),Form("uncal_Fitted_alpha_peaks"));
-	// TCanvas *c = new TCanvas(Form("uncal_Fitted_alpha_peaks_run_%i",runNo),Form("uncal_Fitted_alpha_peaks_run_%i",runNo));
-	c->cd();
-	h->Draw("hist");
-	TF1* f = fitAlphas(xmin, xmax, {guess5388, guess5442, rough5845},0,h);
+	// TCanvas *c = new TCanvas(Form("uncal_Fitted_alpha_peaks"),Form("uncal_Fitted_alpha_peaks"));
+	// // TCanvas *c = new TCanvas(Form("uncal_Fitted_alpha_peaks_run_%i",runNo),Form("uncal_Fitted_alpha_peaks_run_%i",runNo));
+	// c->cd();
+	// TH1F* uncalFit_h=(TH1F*)hist->Clone();
+	// uncalFit_h->GetXaxis()->SetRangeUser(xmin,xmax);
+	// uncalFit_h->DrawCopy("hist");
+	// f->Draw("same");
+	// TF1* f = fitAlphas(xmin, xmax, {guess5388, guess5442, rough5845},0,uncalFit_h);
 	// TF1* f = fitAlphas(1010, 1090, {guess5388, guess5442, rough5845},0,h);
 
 	// Extract fit values and errors
@@ -253,17 +267,17 @@ vector<double> calibrate(TH1F* h=autoGetHist1D(),double xmin=1000, double xmax=1
 	double err5442 = f->GetParError(f->GetParNumber("M1"));
 	double err5388 = f->GetParError(f->GetParNumber("M2"));
 
-	double alphaEnergies[2] = {Am241Energies[2],Am241Energies[1]};
-	double fittedPositions[2] = {fit5845, fit5442};
-	double positionErrors[2] = {err5845, err5442};
-	// double alphaEnergies[3] = {Am241Energies[2],Am241Energies[1],Am241Energies[0]};
-	// double fittedPositions[3] = {fit5845, fit5442, fit5388};
-	// double positionErrors[3] = {err5845, err5442, err5388};
+	// double alphaEnergies[2] = {Am241Energies[2],Am241Energies[1]};
+	// double fittedPositions[2] = {fit5845, fit5442};
+	// double positionErrors[2] = {err5845, err5442};
+	double alphaEnergies[3] = {Am241Energies[2],Am241Energies[1],Am241Energies[0]};
+	double fittedPositions[3] = {fit5845, fit5442, fit5388};
+	double positionErrors[3] = {err5845, err5442, err5388};
 	// double alphaEnergies[2] = {5485.56,  5388.0};
 	// double fittedPositions[2] = {fit5845,  fit5388};
 	// double positionErrors[2] = {err5845,  err5388};
 
-	TGraphErrors* calibrationGraph = new TGraphErrors(2, fittedPositions, alphaEnergies, nullptr, positionErrors);
+	TGraphErrors* calibrationGraph = new TGraphErrors(3, fittedPositions, alphaEnergies, nullptr, positionErrors);
 	// TGraphErrors* calibrationGraph = new TGraphErrors(2, fittedPositions, alphaEnergies, nullptr, positionErrors);
 	calibrationGraph->SetTitle("Energy Calibration;Channel;Energy (keV)");
 	calibrationGraph->SetMarkerStyle(21);
@@ -275,6 +289,7 @@ vector<double> calibrate(TH1F* h=autoGetHist1D(),double xmin=1000, double xmax=1
 	calibrationGraph->Draw("AP");
 
 	TF1* linearFit = new TF1("linearFit", "pol1");
+	cout << "Performing linear fit..." << endl;
 	calibrationGraph->Fit(linearFit, "");
 	// calibrationGraph->Fit(linearFit, "Q");
 
@@ -406,12 +421,22 @@ double FindFWHMuncalibrated(double xmin, double xmax, bool useLinFit=0, TH1F* hi
 	double guess5388 = Am241Energies[0] / roughGain;
 
 	TF1* fit=fitAlphas(xmin,xmax,{guess5388,guess5442,rough5845},true,hist,false,"RN",false);
-	vector<double> linFit=calibrate(hist);
-	double gain=Am241Energies[2]/ fit->GetParameter(fit->GetParNumber("M2"));
-	double offset=0;
-	if(useLinFit) gain=linFit[1];
+	vector<double> linFit=calibrate(hist,fit,xmin,xmax);
+	double gain=1, offset=0;
+	if(!useLinFit) gain=Am241Energies[2]/ fit->GetParameter(fit->GetParNumber("M2"));
+	else {
+		gain=linFit[1];
+		offset=linFit[0];
+	}
+	// double gain=Am241Energies[2]/ fit->GetParameter(fit->GetParNumber("M2"));
+	// cout << gain << " " << linFit[1] << endl;
+	// double offset=0;
+	// if(useLinFit) gain=linFit[1];
 
-	return FindFWHM(fit,xmin,hist->GetMaximumBin(),xmax)*gain;
+	double fwhm=FindFWHM(fit,xmin,hist->GetMaximumBin(),xmax)*gain;
+	cout << "FWHM = " << fwhm << " keV" << endl;
+	// return FindFWHM(fit,xmin,hist->GetMaximumBin(),xmax)*gain;
+	return fwhm;
 }
 
 void PrintAm241()
