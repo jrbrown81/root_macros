@@ -425,6 +425,8 @@ double FindFWHMuncalibrated(double xmin, double xmax, bool useLinFit=0, TH1F* hi
 	double gain=1, offset=0;
 	if(!useLinFit) gain=Am241Energies[2]/ fit->GetParameter(fit->GetParNumber("M2"));
 	else {
+		cout << "Using linear fit to 3 Am241 peaks for calibration. If this fit isn't good (i.e. large Chi2),\n";
+		cout <<"use the 5845 keV peak only (useLinFit=0)." << endl;
 		gain=linFit[1];
 		offset=linFit[0];
 	}
