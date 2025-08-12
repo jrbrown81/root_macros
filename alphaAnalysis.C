@@ -208,6 +208,7 @@ TF1* fitAlphas(double rangeMin, double rangeMax, std::vector<double>peaks,bool v
                 100/(efficiency*binFactor)<<"\n";
     }
     f1->Draw("same");
+	  alphaFit_c ->SaveAs("alphaFits.png");
 
 		// cout << "Resolution: " << f1->GetParameter("sigma")*2.35 << endl;
     return f1;
@@ -215,23 +216,26 @@ TF1* fitAlphas(double rangeMin, double rangeMax, std::vector<double>peaks,bool v
 
 TF1* fitAm241(double rangeMin, double rangeMax, TH1F *hist = autoGetHist1D(), TString fitOpt = "RN",bool noBG = false)
 {
-	double rough5845 = hist->GetMaximumBin();
-	double roughGain = Am241Energies[2] / rough5845;
+	// double rough5485 = hist->GetMaximumBin();
+	double rough5485 = hist->GetBinCenter(hist->GetMaximumBin());
+	double roughGain = Am241Energies[2] / rough5485;
+	// cout << "gain: " << roughGain << endl;
 	double guess5442 = Am241Energies[1] / roughGain;
 	double guess5388 = Am241Energies[0] / roughGain;
 
-	return fitAlphas(rangeMin,rangeMax,{guess5388,guess5442,rough5845},true,hist,false,"RN",false);
+	return fitAlphas(rangeMin,rangeMax,{guess5388,guess5442,rough5485},true,hist,false,"RN",false);
 }
 
 // note that fitAlphas uses Am241 intensities for initial guess of amplitude so may not work correctly
 TF1* fitTripleAlpha(double rangeMin, double rangeMax, TH1F *hist = autoGetHist1D(), TString fitOpt = "RN",bool noBG = false)
 {
-	double rough5845 = hist->GetMaximumBin();
-	double roughGain = tripleAlphaEnergies[1] / rough5845;
+	// double rough5485 = hist->GetMaximumBin();
+	double rough5485 = hist->GetBinCenter(hist->GetMaximumBin());
+	double roughGain = tripleAlphaEnergies[1] / rough5485;
 	double guess5155 = tripleAlphaEnergies[0] / roughGain;
 	double guess5805 = tripleAlphaEnergies[2] / roughGain;
 
-	return fitAlphas(rangeMin,rangeMax,{guess5155,rough5845,guess5805 },true,hist,false,"RN",false);
+	return fitAlphas(rangeMin,rangeMax,{guess5155,rough5485,guess5805 },true,hist,false,"RN",false);
 }
 
 vector<double> calibrate(TH1F* hist=autoGetHist1D(),TF1* f=NULL, double xmin=1000, double xmax=1200)
@@ -240,13 +244,13 @@ vector<double> calibrate(TH1F* hist=autoGetHist1D(),TF1* f=NULL, double xmin=100
 	cout << "Calibrating..." << endl;
 // vector<double> calibrate(TH1F* h, TFile *out, TDirectory *dir,int runNo) {
 	// Rough estimates
-	// double rough5845 = hist->GetMaximumBin();
-	// double roughGain = Am241Energies[2] / rough5845;
+	// double rough5485 = hist->GetMaximumBin();
+	// double roughGain = Am241Energies[2] / rough5485;
 	// double guess5442 = Am241Energies[1] / roughGain;
 	// double guess5388 = Am241Energies[0] / roughGain;
 	//
 	// cout << "First guess at peak positions: ";
-	// cout << guess5388 << ", " << guess5442 << ", " << rough5845 << endl;
+	// cout << guess5388 << ", " << guess5442 << ", " << rough5485 << endl;
 
 	// TCanvas *c = new TCanvas(Form("uncal_Fitted_alpha_peaks"),Form("uncal_Fitted_alpha_peaks"));
 	// // TCanvas *c = new TCanvas(Form("uncal_Fitted_alpha_peaks_run_%i",runNo),Form("uncal_Fitted_alpha_peaks_run_%i",runNo));
@@ -255,27 +259,27 @@ vector<double> calibrate(TH1F* hist=autoGetHist1D(),TF1* f=NULL, double xmin=100
 	// uncalFit_h->GetXaxis()->SetRangeUser(xmin,xmax);
 	// uncalFit_h->DrawCopy("hist");
 	// f->Draw("same");
-	// TF1* f = fitAlphas(xmin, xmax, {guess5388, guess5442, rough5845},0,uncalFit_h);
-	// TF1* f = fitAlphas(1010, 1090, {guess5388, guess5442, rough5845},0,h);
+	// TF1* f = fitAlphas(xmin, xmax, {guess5388, guess5442, rough5485},0,uncalFit_h);
+	// TF1* f = fitAlphas(1010, 1090, {guess5388, guess5442, rough5485},0,h);
 
 	// Extract fit values and errors
-	double fit5845 = f->GetParameter(f->GetParNumber("M2"));
+	double fit5485 = f->GetParameter(f->GetParNumber("M2"));
 	double fit5442 = f->GetParameter(f->GetParNumber("M1"));
 	double fit5388 = f->GetParameter(f->GetParNumber("M0"));
 
-	double err5845 = f->GetParError(f->GetParNumber("M0"));
+	double err5485 = f->GetParError(f->GetParNumber("M0"));
 	double err5442 = f->GetParError(f->GetParNumber("M1"));
 	double err5388 = f->GetParError(f->GetParNumber("M2"));
 
 	// double alphaEnergies[2] = {Am241Energies[2],Am241Energies[1]};
-	// double fittedPositions[2] = {fit5845, fit5442};
-	// double positionErrors[2] = {err5845, err5442};
+	// double fittedPositions[2] = {fit5485, fit5442};
+	// double positionErrors[2] = {err5485, err5442};
 	double alphaEnergies[3] = {Am241Energies[2],Am241Energies[1],Am241Energies[0]};
-	double fittedPositions[3] = {fit5845, fit5442, fit5388};
-	double positionErrors[3] = {err5845, err5442, err5388};
+	double fittedPositions[3] = {fit5485, fit5442, fit5388};
+	double positionErrors[3] = {err5485, err5442, err5388};
 	// double alphaEnergies[2] = {5485.56,  5388.0};
-	// double fittedPositions[2] = {fit5845,  fit5388};
-	// double positionErrors[2] = {err5845,  err5388};
+	// double fittedPositions[2] = {fit5485,  fit5388};
+	// double positionErrors[2] = {err5485,  err5388};
 
 	TGraphErrors* calibrationGraph = new TGraphErrors(3, fittedPositions, alphaEnergies, nullptr, positionErrors);
 	// TGraphErrors* calibrationGraph = new TGraphErrors(2, fittedPositions, alphaEnergies, nullptr, positionErrors);
@@ -292,6 +296,8 @@ vector<double> calibrate(TH1F* hist=autoGetHist1D(),TF1* f=NULL, double xmin=100
 	cout << "Performing linear fit..." << endl;
 	calibrationGraph->Fit(linearFit, "");
 	// calibrationGraph->Fit(linearFit, "Q");
+
+	c2->SaveAs("linearFit.png");
 
 	linearFit->SetLineColor(kRed);
 	linearFit->Draw("same");
@@ -311,7 +317,8 @@ vector<double> calibrate(TH1F* hist=autoGetHist1D(),TF1* f=NULL, double xmin=100
 // 	return calibrate(h);
 // }
 
-TH1F* ApplyCalibration(TH1F* uncalibratedHist, const vector<double>& calibrationParams) {
+TH1F* ApplyCalibration(TH1F* uncalibratedHist, const vector<double>& calibrationParams)
+{
 	if (!uncalibratedHist) {
 	    std::cerr << "Error: Invalid histogram provided for calibration." << std::endl;
 	    return nullptr;
@@ -399,9 +406,11 @@ double FindFWHM(TF1* fit, double xmin, double mean, double xmax)
    double maxVal = fit->GetMaximum();
    double halfMax = maxVal / 2.0;
    // Find the roots where the function crosses half of the maximum
+	 cout << xmin << " " << mean << " " << xmax << endl;
    double leftRoot = fit->GetX(halfMax, xmin, mean);
    double rightRoot = fit->GetX(halfMax, mean, xmax);
    // Calculate FWHM (distance between the two roots)
+	 cout << leftRoot << " " << rightRoot << endl;
    return rightRoot - leftRoot;
 }
 
@@ -410,23 +419,24 @@ double FindFWHM(double xmin=5000, double xmax=6000, TH1F* hist=autoGetHist1D())
    // Get the fit function within the range
 	 TF1* fit=fitAm241(xmin,xmax,hist);
    // Call the real FindFWHM function
-	 return FindFWHM(fit,xmin,hist->GetMaximumBin(),xmax);
+	 return FindFWHM(fit,xmin,hist->GetBinCenter(hist->GetMaximumBin()),xmax);
 }
 
-double FindFWHMuncalibrated(double xmin, double xmax, bool useLinFit=0, TH1F* hist=autoGetHist1D())
+double FindFWHMuncalibrated(double xmin, double xmax, bool useLinFit=1, TH1F* hist=autoGetHist1D())
 {
-	double rough5845 = hist->GetMaximumBin();
-	double roughGain = Am241Energies[2] / rough5845;
-	double guess5442 = Am241Energies[1] / roughGain;
-	double guess5388 = Am241Energies[0] / roughGain;
+	// double rough5485 = hist->GetMaximumBin();
+	// double roughGain = Am241Energies[2] / rough5485;
+	// double guess5442 = Am241Energies[1] / roughGain;
+	// double guess5388 = Am241Energies[0] / roughGain;
+	// TF1* fit=fitAlphas(xmin,xmax,{guess5388,guess5442,rough5485},true,hist,false,"RN",false);
 
-	TF1* fit=fitAlphas(xmin,xmax,{guess5388,guess5442,rough5845},true,hist,false,"RN",false);
+	TF1* fit=fitAm241(xmin,xmax,hist);
 	vector<double> linFit=calibrate(hist,fit,xmin,xmax);
 	double gain=1, offset=0;
 	if(!useLinFit) gain=Am241Energies[2]/ fit->GetParameter(fit->GetParNumber("M2"));
 	else {
-		cout << "Using linear fit to 3 Am241 peaks for calibration. If this fit isn't good (i.e. large Chi2),\n";
-		cout <<"use the 5845 keV peak only (useLinFit=0)." << endl;
+		cout << "Using linear fit to 3 Am241 peaks for calibration. If this fit isn't good (e.g. large Chi2),\n";
+		cout <<"use the 5485 keV peak only (useLinFit=0)." << endl;
 		gain=linFit[1];
 		offset=linFit[0];
 	}
