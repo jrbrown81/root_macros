@@ -115,3 +115,10 @@ void aLab(TH1F *h = NULL)
 
     h->GetYaxis()->SetTitle(Form("Counts / (%.2f keV)", h->GetBinWidth(1)));
 }
+
+void printMyUsefulMacros()
+{
+	cout << "Available functions loaded in 'myUsefulMacros.C' are:\n"
+				<< "autoGetHist1D() (agh()), autoGetPad(), autoGetCanvas, autoGetGraph,\n"
+				<< "logx(), logy(), logz(), prettyH()." << endl;
+}
