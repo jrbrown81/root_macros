@@ -406,11 +406,9 @@ double FindFWHM(TF1* fit, double xmin, double mean, double xmax)
    double maxVal = fit->GetMaximum();
    double halfMax = maxVal / 2.0;
    // Find the roots where the function crosses half of the maximum
-	 cout << xmin << " " << mean << " " << xmax << endl;
    double leftRoot = fit->GetX(halfMax, xmin, mean);
    double rightRoot = fit->GetX(halfMax, mean, xmax);
    // Calculate FWHM (distance between the two roots)
-	 cout << leftRoot << " " << rightRoot << endl;
    return rightRoot - leftRoot;
 }
 
